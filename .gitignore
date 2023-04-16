@@ -1,0 +1,10 @@
+*
+!*/
+
+.idea
+!.gitignore
+!requirements.txt
+!logging.yml
+!client.py
+
+!client/**

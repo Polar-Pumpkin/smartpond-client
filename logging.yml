@@ -1,0 +1,31 @@
+version: 1
+formatters:
+  default:
+    format: '[{asctime}][{levelname:8}][{name}] {message}'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+    style: '{'
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: default
+    level: INFO
+    stream: ext://sys.stdout
+  file:
+    class: logging.handlers.TimedRotatingFileHandler
+    formatter: default
+    level: DEBUG
+    filename: logs/latest.log
+    when: D
+    interval: 1
+    backupCount: 31
+  error:
+    class: logging.handlers.RotatingFileHandler
+    formatter: default
+    level: ERROR
+    filename: logs/error.log
+    maxBytes: 10240
+    backupCount: 3
+loggers:
+  client:
+    level: DEBUG
+    handlers: [console, file, error]
