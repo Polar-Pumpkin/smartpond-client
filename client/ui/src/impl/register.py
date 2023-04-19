@@ -16,8 +16,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLabel,
-    QLineEdit, QProgressBar, QPushButton, QSizePolicy,
-    QSpacerItem, QVBoxLayout, QWidget)
+    QLineEdit, QPushButton, QSizePolicy, QSpacerItem,
+    QVBoxLayout, QWidget)
 
 class Ui_Register(object):
     def setupUi(self, Register):
@@ -120,23 +120,6 @@ class Ui_Register(object):
 
         self.central.addWidget(self.reg)
 
-        self.bar = QProgressBar(Register)
-        self.bar.setObjectName(u"bar")
-        self.bar.setMinimumSize(QSize(400, 20))
-        self.bar.setMaximumSize(QSize(400, 20))
-        self.bar.setMaximum(0)
-        self.bar.setValue(-1)
-
-        self.central.addWidget(self.bar)
-
-        self.message = QLabel(Register)
-        self.message.setObjectName(u"message")
-        self.message.setMinimumSize(QSize(400, 20))
-        self.message.setMaximumSize(QSize(400, 20))
-        self.message.setAlignment(Qt.AlignCenter)
-
-        self.central.addWidget(self.message)
-
 
         self.hori_base.addLayout(self.central)
 
@@ -175,6 +158,5 @@ class Ui_Register(object):
 #if QT_CONFIG(shortcut)
         self.reg.setShortcut(QCoreApplication.translate("Register", u"Return", None))
 #endif // QT_CONFIG(shortcut)
-        self.message.setText(QCoreApplication.translate("Register", u"\u9519\u8bef\u4fe1\u606f", None))
     # retranslateUi
 

@@ -253,50 +253,6 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QProgressBar" name="bar">
-           <property name="minimumSize">
-            <size>
-             <width>400</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>400</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="maximum">
-            <number>0</number>
-           </property>
-           <property name="value">
-            <number>-1</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="message">
-           <property name="minimumSize">
-            <size>
-             <width>400</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>400</width>
-             <height>20</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>错误信息</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
        <item>

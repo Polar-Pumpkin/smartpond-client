@@ -39,3 +39,6 @@ class Backend(metaclass=Singleton):
         if response.status_code != 200:
             return
         self.__session.auth = TokenAuth(response.json()['token'])
+
+    def list_token(self) -> Future[Response]:
+        return self.__session.post('/token/list')
