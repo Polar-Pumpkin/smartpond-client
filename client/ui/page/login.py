@@ -1,6 +1,7 @@
 from asyncio import Future
 from typing import Optional
 
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 from requests import Response
 
@@ -12,6 +13,8 @@ from client.ui.widget import StatusWidget
 
 
 class LoginPage(QWidget, Ui_Centralize):
+    navigate = Signal()
+
     def __init__(self, window: MainWindow, username: Optional[str] = None):
         super(LoginPage, self).__init__()
         self.window: MainWindow = window
@@ -27,6 +30,7 @@ class LoginPage(QWidget, Ui_Centralize):
 
         self.widget.reg.clicked.connect(self.__to_register)
         self.widget.login.clicked.connect(self.__login)
+        self.navigate.connect(self.__to_token)
 
     def __to_register(self):
         from client.ui.page.register import RegisterPage
@@ -48,11 +52,14 @@ class LoginPage(QWidget, Ui_Centralize):
         self.status.hide_all()
         self.widget.status_reset()
 
+    def __to_token(self):
+        from client.ui.page import TokenPage
+        self.window.context.emit(TokenPage(self.window))
+
     def __login_callback(self, future: Future[Response]):
         response = future.result()
         self.__status_reset()
         if response.status_code != 200:
             self.status.emit_message('用户名或密码错误')
             return
-        from client.ui.page import TokenPage
-        self.window.context.emit(TokenPage(self.window))
+        self.navigate.emit()
