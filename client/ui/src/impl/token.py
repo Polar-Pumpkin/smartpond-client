@@ -15,34 +15,18 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLabel,
-    QSizePolicy, QSpacerItem, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QLabel, QSizePolicy, QVBoxLayout,
+    QWidget)
 
 class Ui_Token(object):
     def setupUi(self, Token):
         if not Token.objectName():
             Token.setObjectName(u"Token")
-        Token.resize(680, 590)
-        self.gridLayout = QGridLayout(Token)
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.base_vert = QVBoxLayout()
-        self.base_vert.setObjectName(u"base_vert")
-        self.base_vert.setContentsMargins(10, 10, 10, 10)
-        self.vert_space_up = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-
-        self.base_vert.addItem(self.vert_space_up)
-
-        self.base_hori = QHBoxLayout()
-        self.base_hori.setObjectName(u"base_hori")
-        self.base_hori.setContentsMargins(10, 10, 10, 10)
-        self.hori_space_left = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.base_hori.addItem(self.hori_space_left)
-
-        self.central = QVBoxLayout()
-        self.central.setSpacing(10)
-        self.central.setObjectName(u"central")
-        self.central.setContentsMargins(10, 10, 10, 10)
+        Token.resize(400, 94)
+        self.context = QVBoxLayout(Token)
+        self.context.setSpacing(10)
+        self.context.setObjectName(u"context")
+        self.context.setContentsMargins(0, 0, 0, 0)
         self.title = QLabel(Token)
         self.title.setObjectName(u"title")
         self.title.setMinimumSize(QSize(400, 20))
@@ -51,39 +35,12 @@ class Ui_Token(object):
         font.setBold(True)
         self.title.setFont(font)
 
-        self.central.addWidget(self.title)
+        self.context.addWidget(self.title)
 
         self.description = QLabel(Token)
         self.description.setObjectName(u"description")
 
-        self.central.addWidget(self.description)
-
-        self.context = QVBoxLayout()
-        self.context.setObjectName(u"context")
-
-        self.central.addLayout(self.context)
-
-        self.footer = QVBoxLayout()
-        self.footer.setObjectName(u"footer")
-
-        self.central.addLayout(self.footer)
-
-
-        self.base_hori.addLayout(self.central)
-
-        self.hori_space_right = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.base_hori.addItem(self.hori_space_right)
-
-
-        self.base_vert.addLayout(self.base_hori)
-
-        self.vert_space_down = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-
-        self.base_vert.addItem(self.vert_space_down)
-
-
-        self.gridLayout.addLayout(self.base_vert, 0, 0, 1, 1)
+        self.context.addWidget(self.description)
 
 
         self.retranslateUi(Token)

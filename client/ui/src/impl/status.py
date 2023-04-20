@@ -22,11 +22,11 @@ class Ui_Status(object):
     def setupUi(self, Status):
         if not Status.objectName():
             Status.setObjectName(u"Status")
-        Status.resize(400, 68)
-        self.verticalLayout_2 = QVBoxLayout(Status)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.central = QVBoxLayout()
-        self.central.setObjectName(u"central")
+        Status.resize(400, 43)
+        self.verticalLayout = QVBoxLayout(Status)
+        self.verticalLayout.setSpacing(10)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.bar = QProgressBar(Status)
         self.bar.setObjectName(u"bar")
         self.bar.setMinimumSize(QSize(0, 20))
@@ -34,15 +34,12 @@ class Ui_Status(object):
         self.bar.setMaximum(0)
         self.bar.setValue(-1)
 
-        self.central.addWidget(self.bar)
+        self.verticalLayout.addWidget(self.bar)
 
         self.message = QLabel(Status)
         self.message.setObjectName(u"message")
 
-        self.central.addWidget(self.message)
-
-
-        self.verticalLayout_2.addLayout(self.central)
+        self.verticalLayout.addWidget(self.message)
 
 
         self.retranslateUi(Status)

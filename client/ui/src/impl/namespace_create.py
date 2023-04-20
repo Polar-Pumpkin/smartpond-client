@@ -15,31 +15,30 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLabel,
-    QLineEdit, QPushButton, QSizePolicy, QSpacerItem,
-    QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QLineEdit,
+    QPushButton, QSizePolicy, QSpacerItem, QVBoxLayout,
+    QWidget)
 
 class Ui_NamespaceCreate(object):
     def setupUi(self, NamespaceCreate):
         if not NamespaceCreate.objectName():
             NamespaceCreate.setObjectName(u"NamespaceCreate")
-        NamespaceCreate.resize(400, 162)
-        self.gridLayout = QGridLayout(NamespaceCreate)
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.central = QVBoxLayout()
-        self.central.setSpacing(10)
-        self.central.setObjectName(u"central")
+        NamespaceCreate.resize(400, 136)
+        self.verticalLayout = QVBoxLayout(NamespaceCreate)
+        self.verticalLayout.setSpacing(10)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.title = QLabel(NamespaceCreate)
         self.title.setObjectName(u"title")
 
-        self.central.addWidget(self.title)
+        self.verticalLayout.addWidget(self.title)
 
         self.name = QLineEdit(NamespaceCreate)
         self.name.setObjectName(u"name")
         self.name.setMinimumSize(QSize(0, 40))
         self.name.setMaximumSize(QSize(16777215, 40))
 
-        self.central.addWidget(self.name)
+        self.verticalLayout.addWidget(self.name)
 
         self.footer = QHBoxLayout()
         self.footer.setSpacing(10)
@@ -68,10 +67,7 @@ class Ui_NamespaceCreate(object):
         self.footer.addWidget(self.secondary)
 
 
-        self.central.addLayout(self.footer)
-
-
-        self.gridLayout.addLayout(self.central, 0, 0, 1, 1)
+        self.verticalLayout.addLayout(self.footer)
 
 
         self.retranslateUi(NamespaceCreate)

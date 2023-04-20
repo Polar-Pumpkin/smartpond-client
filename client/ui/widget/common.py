@@ -1,17 +1,19 @@
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtWidgets import QWidget
 
-from client.ui.src.impl.status import Ui_Status
+from client.ui.src.impl import Ui_Status
 
 
 class StatusWidget(QWidget, Ui_Status):
-    message_signal = Signal(str)
+    status = Signal(str, bool)
 
-    def __init__(self, center: bool = False):
+    def __init__(self, width: int, center: bool = False):
         super(StatusWidget, self).__init__()
         self.setupUi(self)
+        self.setFixedWidth(width)
+        self.hide_all()
 
-        self.message_signal.connect(self.__show_message)
+        self.status.connect(self.show_message)
         if center:
             self.message.setAlignment(Qt.AlignCenter)
 
@@ -21,8 +23,8 @@ class StatusWidget(QWidget, Ui_Status):
     def hide_bar(self):
         self.bar.hide()
 
-    def emit_message(self, message: str):
-        self.message_signal.emit(message)
+    def emit_message(self, message: str, show_bar: bool = False):
+        self.status.emit(message, show_bar)
 
     def show_message(self, message: str, show_bar: bool = False):
         self.__show_message(message)

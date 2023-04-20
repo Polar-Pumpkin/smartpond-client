@@ -14,5 +14,5 @@ class MainWindow(QMainWindow):
         # self.stacks.addWidget(LoginWidget())
         self.context.connect(self.setCentralWidget)
 
-        from client.ui.widget.login import LoginWidget
-        self.setCentralWidget(LoginWidget(self))
+        from client.ui.page import LoginPage
+        self.setCentralWidget(LoginPage(self))

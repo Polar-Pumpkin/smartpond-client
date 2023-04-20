@@ -15,20 +15,19 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout, QLabel,
-    QListWidget, QListWidgetItem, QPushButton, QSizePolicy,
-    QSpacerItem, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QListWidget,
+    QListWidgetItem, QPushButton, QSizePolicy, QSpacerItem,
+    QVBoxLayout, QWidget)
 
 class Ui_NamespaceSelect(object):
     def setupUi(self, NamespaceSelect):
         if not NamespaceSelect.objectName():
             NamespaceSelect.setObjectName(u"NamespaceSelect")
-        NamespaceSelect.resize(400, 276)
-        self.gridLayout = QGridLayout(NamespaceSelect)
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.central = QVBoxLayout()
-        self.central.setSpacing(10)
-        self.central.setObjectName(u"central")
+        NamespaceSelect.resize(400, 206)
+        self.verticalLayout = QVBoxLayout(NamespaceSelect)
+        self.verticalLayout.setSpacing(10)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.header = QHBoxLayout()
         self.header.setSpacing(10)
         self.header.setObjectName(u"header")
@@ -58,12 +57,12 @@ class Ui_NamespaceSelect(object):
         self.header.addWidget(self.header_secondary)
 
 
-        self.central.addLayout(self.header)
+        self.verticalLayout.addLayout(self.header)
 
         self.namespaces = QListWidget(NamespaceSelect)
         self.namespaces.setObjectName(u"namespaces")
 
-        self.central.addWidget(self.namespaces)
+        self.verticalLayout.addWidget(self.namespaces)
 
         self.footer = QHBoxLayout()
         self.footer.setSpacing(10)
@@ -86,10 +85,7 @@ class Ui_NamespaceSelect(object):
         self.footer.addItem(self.horizontalSpacer)
 
 
-        self.central.addLayout(self.footer)
-
-
-        self.gridLayout.addLayout(self.central, 0, 0, 1, 1)
+        self.verticalLayout.addLayout(self.footer)
 
 
         self.retranslateUi(NamespaceSelect)
