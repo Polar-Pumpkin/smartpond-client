@@ -12,7 +12,7 @@ class NamespaceCreateWidget(QWidget, Ui_NamespaceCreate):
                  secondary: Optional[str] = None):
         super(NamespaceCreateWidget, self).__init__()
         self.setupUi(self)
-        self.allocate(title, placeholder, confirm, secondary)
+        self.allocate(placeholder, confirm, secondary, title)
 
     def allocate(self, placeholder: str, confirm: str,
                  secondary: Optional[str] = None,

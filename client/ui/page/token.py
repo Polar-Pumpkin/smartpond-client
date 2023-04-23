@@ -3,6 +3,7 @@ from asyncio import Future
 from datetime import datetime
 from typing import Dict
 
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 from requests import Response
 
@@ -15,6 +16,9 @@ logger = logging.getLogger(__name__)
 
 
 class TokenPage(QWidget, Ui_Centralize):
+    signal_creation = Signal()
+    signal_selection = Signal()
+
     def __init__(self, window: MainWindow):
         super(TokenPage, self).__init__()
         self.window: MainWindow = window
@@ -26,6 +30,9 @@ class TokenPage(QWidget, Ui_Centralize):
 
         self.context.addWidget(self.widget)
         self.context.addWidget(self.status)
+
+        self.signal_creation.connect(self.__to_creation)
+        self.signal_selection.connect(self.__to_selection)
 
     def refresh(self):
         self.widget.clean()
@@ -45,7 +52,7 @@ class TokenPage(QWidget, Ui_Centralize):
 
     def __to_selection(self):
         if len(self.tokens) <= 0:
-            self.__to_creation()
+            self.signal_creation.emit()
             return
         widget = NamespaceSelectWidget(list(self.tokens.keys()), '使用该登录凭证',
                                        self.__on_select, '创建新登录凭证', '刷新')
@@ -59,12 +66,14 @@ class TokenPage(QWidget, Ui_Centralize):
 
     def __list_callback(self, future: Future[Response]):
         response = future.result()
-        logger.info(response.text)
         self.status.hide_all()
         self.tokens.clear()
+        if response.status_code != 200:
+            self.status.emit_message('获取登录凭据失败')
+            return
         for token in response.json()['tokens']:
             self.tokens[token['name']] = token['timestamp']
-        self.__to_selection()
+        self.signal_selection.emit()
 
     def __on_select(self, name: str) -> str:
         timestamp = self.tokens[name]

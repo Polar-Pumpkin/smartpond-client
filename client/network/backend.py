@@ -17,20 +17,22 @@ class TokenAuth(AuthBase):
 
     def __call__(self, r):
         r.headers['Authorization'] = 'Bearer ' + self.token
+        return r
 
 
 class Backend(metaclass=Singleton):
     __base_url = 'https://api.entityparrot.cc/smartpond/'
-    __session = FuturesSession(session=LiveServerSession(__base_url))
+    __session = LiveServerSession(__base_url)
+    __client = FuturesSession(session=__session)
 
     def is_username_available(self, name: str) -> Future[Response]:
-        return self.__session.get('/user/available', data=name)
+        return self.__client.get('/user/available', data=name)
 
     def reg(self, username: str, password: str) -> Future[Response]:
-        return self.__session.post('/user/reg', json={'username': username, 'password': password})
+        return self.__client.post('/user/reg', json={'username': username, 'password': password})
 
     def login(self, username: str, password: str) -> Future[Response]:
-        future = self.__session.post('/user/auth', json={'username': username, 'password': password})
+        future = self.__client.post('/user/auth', json={'username': username, 'password': password})
         future.add_done_callback(self.__auth)
         return future
 
@@ -39,6 +41,10 @@ class Backend(metaclass=Singleton):
         if response.status_code != 200:
             return
         self.__session.auth = TokenAuth(response.json()['token'])
+        logger.info('Session 已注册')
 
     def list_token(self) -> Future[Response]:
-        return self.__session.post('/token/list')
+        return self.__client.get('/token/list')
+
+    def headers(self) -> Future[Response]:
+        return self.__client.get('https://httpbin.org/headers', absolute=True)

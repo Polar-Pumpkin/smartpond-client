@@ -7,5 +7,6 @@ class LiveServerSession(Session):
         self.base_url = base_url
 
     def request(self, method, url, *args, **kwargs):
-        joined_url = '/'.join([self.base_url.rstrip('/'), url.lstrip('/')])
-        return super().request(method, joined_url, *args, **kwargs)
+        if not kwargs.pop('absolute', False):
+            url = '/'.join([self.base_url.rstrip('/'), url.lstrip('/')])
+        return super().request(method, url, *args, **kwargs)
