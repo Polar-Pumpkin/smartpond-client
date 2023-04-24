@@ -1,11 +1,16 @@
+import logging
+from typing import Optional
+
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtWidgets import QWidget
 
 from client.ui.src.impl import Ui_Status
 
+logger = logging.getLogger(__name__)
+
 
 class StatusWidget(QWidget, Ui_Status):
-    status = Signal(str, bool)
+    status = Signal(str, bool, str)
 
     def __init__(self, width: int, center: bool = False):
         super(StatusWidget, self).__init__()
@@ -23,23 +28,35 @@ class StatusWidget(QWidget, Ui_Status):
     def hide_bar(self):
         self.bar.hide()
 
-    def emit_message(self, message: str, show_bar: bool = False):
-        self.status.emit(message, show_bar)
+    def emit_message(self, message: str, show_bar: bool = False, action: Optional[str] = None):
+        self.status.emit(message, show_bar, action)
 
-    def show_message(self, message: str, show_bar: bool = False):
-        self.__show_message(message)
-        self.bar.setHidden(not show_bar)
-
-    def __show_message(self, message: str):
+    def show_message(self, message: str, show_bar: bool = False, action: Optional[str] = None):
         self.message.show()
         self.message.setText(message)
+        if show_bar:
+            logger.info(message)
+        else:
+            logger.warning(message)
+
+        self.bar.setHidden(not show_bar)
+        if action is not None:
+            self.show_action(action)
 
     def hide_message(self):
         self.message.hide()
 
+    def show_action(self, action: str):
+        self.action.show()
+        self.action.setText(action)
+
+    def hide_action(self):
+        self.action.hide()
+
     def hide_all(self):
         self.hide_bar()
         self.hide_message()
+        self.hide_action()
 
     def validate_credential(self, username: str, password: str) -> bool:
         try:

@@ -15,14 +15,14 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QLabel, QProgressBar, QSizePolicy,
-    QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QLabel, QProgressBar, QPushButton,
+    QSizePolicy, QVBoxLayout, QWidget)
 
 class Ui_Status(object):
     def setupUi(self, Status):
         if not Status.objectName():
             Status.setObjectName(u"Status")
-        Status.resize(400, 43)
+        Status.resize(400, 89)
         self.verticalLayout = QVBoxLayout(Status)
         self.verticalLayout.setSpacing(10)
         self.verticalLayout.setObjectName(u"verticalLayout")
@@ -41,6 +41,13 @@ class Ui_Status(object):
 
         self.verticalLayout.addWidget(self.message)
 
+        self.action = QPushButton(Status)
+        self.action.setObjectName(u"action")
+        self.action.setMinimumSize(QSize(0, 40))
+        self.action.setMaximumSize(QSize(16777215, 40))
+
+        self.verticalLayout.addWidget(self.action)
+
 
         self.retranslateUi(Status)
 
@@ -50,5 +57,6 @@ class Ui_Status(object):
     def retranslateUi(self, Status):
         Status.setWindowTitle(QCoreApplication.translate("Status", u"\u5904\u7406\u72b6\u6001", None))
         self.message.setText(QCoreApplication.translate("Status", u"\u9519\u8bef\u4fe1\u606f", None))
+        self.action.setText(QCoreApplication.translate("Status", u"\u64cd\u4f5c", None))
     # retranslateUi
 

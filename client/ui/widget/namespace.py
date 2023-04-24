@@ -1,5 +1,6 @@
 from typing import Optional, Sequence, Callable
 
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 
 from client.ui.src.impl import Ui_NamespaceCreate
@@ -7,12 +8,20 @@ from client.ui.src.impl import Ui_NamespaceSelect
 
 
 class NamespaceCreateWidget(QWidget, Ui_NamespaceCreate):
+    signal_lock = Signal()
+    signal_unlock = Signal()
+
     def __init__(self, placeholder: str, confirm: str,
                  title: Optional[str] = None,
                  secondary: Optional[str] = None):
         super(NamespaceCreateWidget, self).__init__()
         self.setupUi(self)
         self.allocate(placeholder, confirm, secondary, title)
+
+        self.cached_name: Optional[str] = None
+
+        self.signal_lock.connect(self.lock)
+        self.signal_unlock.connect(self.unlock)
 
     def allocate(self, placeholder: str, confirm: str,
                  secondary: Optional[str] = None,
@@ -27,6 +36,18 @@ class NamespaceCreateWidget(QWidget, Ui_NamespaceCreate):
             self.secondary.setText(secondary)
         else:
             self.secondary.hide()
+
+    def lock(self):
+        self.name.setEnabled(False)
+        self.confirm.setEnabled(False)
+        self.secondary.setEnabled(False)
+        self.cached_name = self.name.text()
+
+    def unlock(self):
+        self.name.setEnabled(True)
+        self.confirm.setEnabled(True)
+        self.secondary.setEnabled(True)
+        self.cached_name = None
 
 
 class NamespaceSelectWidget(QWidget, Ui_NamespaceSelect):

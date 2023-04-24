@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 class TokenPage(QWidget, Ui_Centralize):
     signal_creation = Signal()
     signal_selection = Signal()
+    critical = Signal(str)
 
     def __init__(self, window: MainWindow):
         super(TokenPage, self).__init__()
@@ -31,13 +32,18 @@ class TokenPage(QWidget, Ui_Centralize):
         self.context.addWidget(self.widget)
         self.context.addWidget(self.status)
 
+        self.status.action.clicked.connect(self.refresh)
         self.signal_creation.connect(self.__to_creation)
         self.signal_selection.connect(self.__to_selection)
+        self.critical.connect(self.__critical)
 
     def refresh(self):
         self.widget.clean()
         self.status.show_message('正在列出登录凭证', True)
         Backend().list_token().add_done_callback(self.__list_callback)
+
+    def __critical(self, message: str):
+        self.status.show_message(message, False, '重试')
 
     def __to_creation(self):
         widget = NamespaceCreateWidget('登录凭据名称', '创建登录凭据',
@@ -48,7 +54,14 @@ class TokenPage(QWidget, Ui_Centralize):
         self.widget.display.emit(widget)
 
     def __create(self):
-        pass
+        creation = self.widget.widget
+        if not isinstance(creation, NamespaceCreateWidget):
+            self.__critical('异常状态')
+            return
+        self.status.hide_message()
+        self.status.show_bar()
+        creation.lock()
+        Backend().is_token_available(creation.cached_name).add_done_callback(self.__available_callback)
 
     def __to_selection(self):
         if len(self.tokens) <= 0:
@@ -69,11 +82,46 @@ class TokenPage(QWidget, Ui_Centralize):
         self.status.hide_all()
         self.tokens.clear()
         if response.status_code != 200:
-            self.status.emit_message('获取登录凭据失败')
+            self.critical.emit('获取登录凭据失败')
             return
         for token in response.json()['tokens']:
             self.tokens[token['name']] = token['timestamp']
         self.signal_selection.emit()
+
+    def __available_callback(self, future: Future[Response]):
+        creation = self.widget.widget
+        if not isinstance(creation, NamespaceCreateWidget):
+            self.critical.emit('异常状态')
+            return
+        response = future.result()
+        availability = response.json()
+        try:
+            assert response.status_code == 200, '检查登录凭证名称失败, 请稍后再试'
+            assert availability['isAvailable'], '登录凭证名称已被占用'
+        except AssertionError as ex:
+            self.status.emit_message(str(ex))
+            creation.signal_unlock.emit()
+            return
+        Backend().create_token(creation.cached_name).add_done_callback(self.__create_callback)
+
+    def __create_callback(self, future: Future[Response]):
+        creation = self.widget.widget
+        if not isinstance(creation, NamespaceCreateWidget):
+            self.critical.emit('异常状态')
+            return
+        response = future.result()
+        if response.status_code != 201:
+            self.status.emit_message(response.text)
+            creation.signal_unlock.emit()
+            return
+        Backend().generate_token(creation.cached_name).add_done_callback(self.__generate_callback)
+
+    def __generate_callback(self, future: Future[Response]):
+        response = future.result()
+        if response.status_code != 201:
+            self.critical.emit('生成登录凭证失败')
+            return
+        # TODO save token and next
 
     def __on_select(self, name: str) -> str:
         timestamp = self.tokens[name]

@@ -46,5 +46,11 @@ class Backend(metaclass=Singleton):
     def list_token(self) -> Future[Response]:
         return self.__client.get('/token/list')
 
-    def headers(self) -> Future[Response]:
-        return self.__client.get('https://httpbin.org/headers', absolute=True)
+    def is_token_available(self, name: str) -> Future[Response]:
+        return self.__client.get('/token/available', data=name)
+
+    def create_token(self, name: str) -> Future[Response]:
+        return self.__client.post('/token/create', data=name)
+
+    def generate_token(self, name: str) -> Future[Response]:
+        return self.__client.get('/token/generate/constant', data=name)
