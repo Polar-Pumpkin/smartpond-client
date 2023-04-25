@@ -27,4 +27,5 @@ class TokenWidget(QWidget, Ui_Token):
     def clean(self):
         if self.widget is not None:
             self.context.removeWidget(self.widget)
+            self.widget.deleteLater()
         self.widget = None

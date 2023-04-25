@@ -19,7 +19,7 @@ class RegisterPage(QWidget, Ui_Centralize):
         super(RegisterPage, self).__init__()
         self.window: MainWindow = window
         self.widget: RegisterWidget = RegisterWidget()
-        self.status: StatusWidget = StatusWidget(400, True)
+        self.status: StatusWidget = StatusWidget(True)
         self.setupUi(self)
 
         self.context.addWidget(self.widget)

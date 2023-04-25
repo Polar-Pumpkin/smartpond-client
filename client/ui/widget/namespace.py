@@ -60,6 +60,9 @@ class NamespaceSelectWidget(QWidget, Ui_NamespaceSelect):
         self.setupUi(self)
         self.refresh(namespaces)
 
+        self.cached_selected: Optional[str] = None
+
+        self.selected.hide()
         self.confirm.setText(confirm)
         if header_preferred is not None:
             self.header_preferred.setText(header_preferred)
@@ -77,4 +80,19 @@ class NamespaceSelectWidget(QWidget, Ui_NamespaceSelect):
         self.namespaces.addItems(namespaces)
 
     def __on_selected(self, item):
+        if self.selected.isHidden():
+            self.selected.show()
         self.selected.setText(self.select(item.text()))
+        self.cached_selected = item.text()
+
+    def lock(self):
+        self.header_preferred.setEnabled(False)
+        self.header_secondary.setEnabled(False)
+        self.namespaces.setEnabled(False)
+        self.confirm.setEnabled(False)
+
+    def unlock(self):
+        self.header_preferred.setEnabled(True)
+        self.header_secondary.setEnabled(True)
+        self.namespaces.setEnabled(False)
+        self.confirm.setEnabled(True)

@@ -12,10 +12,9 @@ logger = logging.getLogger(__name__)
 class StatusWidget(QWidget, Ui_Status):
     status = Signal(str, bool, str)
 
-    def __init__(self, width: int, center: bool = False):
+    def __init__(self, center: bool = False):
         super(StatusWidget, self).__init__()
         self.setupUi(self)
-        self.setFixedWidth(width)
         self.hide_all()
 
         self.status.connect(self.show_message)
@@ -40,7 +39,7 @@ class StatusWidget(QWidget, Ui_Status):
             logger.warning(message)
 
         self.bar.setHidden(not show_bar)
-        if action is not None:
+        if action is not None and len(action) > 0:
             self.show_action(action)
 
     def hide_message(self):

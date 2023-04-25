@@ -72,16 +72,16 @@ class Ui_Login(object):
         self.area_login.setObjectName(u"area_login")
         self.username = QLineEdit(Login)
         self.username.setObjectName(u"username")
-        self.username.setMinimumSize(QSize(400, 40))
-        self.username.setMaximumSize(QSize(400, 40))
+        self.username.setMinimumSize(QSize(0, 40))
+        self.username.setMaximumSize(QSize(16777215, 40))
         self.username.setClearButtonEnabled(True)
 
         self.area_login.addWidget(self.username)
 
         self.password = QLineEdit(Login)
         self.password.setObjectName(u"password")
-        self.password.setMinimumSize(QSize(400, 40))
-        self.password.setMaximumSize(QSize(400, 40))
+        self.password.setMinimumSize(QSize(0, 40))
+        self.password.setMaximumSize(QSize(16777215, 40))
         self.password.setEchoMode(QLineEdit.Password)
         self.password.setClearButtonEnabled(True)
 
@@ -92,8 +92,8 @@ class Ui_Login(object):
 
         self.login = QPushButton(Login)
         self.login.setObjectName(u"login")
-        self.login.setMinimumSize(QSize(400, 40))
-        self.login.setMaximumSize(QSize(400, 40))
+        self.login.setMinimumSize(QSize(0, 40))
+        self.login.setMaximumSize(QSize(16777215, 40))
 
         self.verticalLayout.addWidget(self.login)
 

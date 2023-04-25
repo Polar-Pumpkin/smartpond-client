@@ -24,7 +24,7 @@ class TokenPage(QWidget, Ui_Centralize):
         super(TokenPage, self).__init__()
         self.window: MainWindow = window
         self.widget: TokenWidget = TokenWidget()
-        self.status: StatusWidget = StatusWidget(400)
+        self.status: StatusWidget = StatusWidget()
         self.tokens: Dict[str, datetime] = {}
         self.setupUi(self)
         self.refresh()
@@ -61,6 +61,10 @@ class TokenPage(QWidget, Ui_Centralize):
         self.status.hide_message()
         self.status.show_bar()
         creation.lock()
+        if not len(creation.cached_name) > 0:
+            self.status.show_message('请输入登录凭据名称')
+            creation.unlock()
+            return
         Backend().is_token_available(creation.cached_name).add_done_callback(self.__available_callback)
 
     def __to_selection(self):
@@ -70,12 +74,19 @@ class TokenPage(QWidget, Ui_Centralize):
         widget = NamespaceSelectWidget(list(self.tokens.keys()), '使用该登录凭证',
                                        self.__on_select, '创建新登录凭证', '刷新')
         widget.confirm.clicked.connect(self.__select)
-        widget.header_preferred.connect(self.__to_creation)
-        widget.header_secondary.connect(self.refresh)
+        widget.header_preferred.clicked.connect(self.__to_creation)
+        widget.header_secondary.clicked.connect(self.refresh)
         self.widget.display.emit(widget)
 
     def __select(self):
-        pass
+        selection = self.widget.widget
+        if not isinstance(selection, NamespaceSelectWidget):
+            self.__critical('异常状态')
+            return
+        self.status.hide_message()
+        self.status.show_bar()
+        selection.lock()
+        Backend().generate_token(selection.cached_selected).add_done_callback(self.__generate_callback)
 
     def __list_callback(self, future: Future[Response]):
         response = future.result()
@@ -85,7 +96,7 @@ class TokenPage(QWidget, Ui_Centralize):
             self.critical.emit('获取登录凭据失败')
             return
         for token in response.json()['tokens']:
-            self.tokens[token['name']] = token['timestamp']
+            self.tokens[token['name']] = datetime.fromtimestamp(token['timestamp'] / 1000)
         self.signal_selection.emit()
 
     def __available_callback(self, future: Future[Response]):
@@ -125,4 +136,4 @@ class TokenPage(QWidget, Ui_Centralize):
 
     def __on_select(self, name: str) -> str:
         timestamp = self.tokens[name]
-        return f'已选择: ${name}\n创建于 ${timestamp.strftime("%Y-%m-%d %H:%M:%S")}'
+        return f'已选择: {name}\n创建于 {timestamp.strftime("%Y-%m-%d %H:%M:%S")}'

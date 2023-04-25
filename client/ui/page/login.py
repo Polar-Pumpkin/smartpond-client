@@ -19,7 +19,7 @@ class LoginPage(QWidget, Ui_Centralize):
         super(LoginPage, self).__init__()
         self.window: MainWindow = window
         self.widget: LoginWidget = LoginWidget()
-        self.status: StatusWidget = StatusWidget(400, True)
+        self.status: StatusWidget = StatusWidget(True)
         self.setupUi(self)
 
         self.context.addWidget(self.widget)

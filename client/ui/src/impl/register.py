@@ -72,16 +72,16 @@ class Ui_Register(object):
         self.area_register.setObjectName(u"area_register")
         self.username = QLineEdit(Register)
         self.username.setObjectName(u"username")
-        self.username.setMinimumSize(QSize(400, 40))
-        self.username.setMaximumSize(QSize(400, 40))
+        self.username.setMinimumSize(QSize(0, 40))
+        self.username.setMaximumSize(QSize(16777215, 40))
         self.username.setClearButtonEnabled(True)
 
         self.area_register.addWidget(self.username)
 
         self.password = QLineEdit(Register)
         self.password.setObjectName(u"password")
-        self.password.setMinimumSize(QSize(400, 40))
-        self.password.setMaximumSize(QSize(400, 40))
+        self.password.setMinimumSize(QSize(0, 40))
+        self.password.setMaximumSize(QSize(16777215, 40))
         self.password.setEchoMode(QLineEdit.Password)
         self.password.setClearButtonEnabled(True)
 
@@ -92,8 +92,8 @@ class Ui_Register(object):
 
         self.reg = QPushButton(Register)
         self.reg.setObjectName(u"reg")
-        self.reg.setMinimumSize(QSize(400, 40))
-        self.reg.setMaximumSize(QSize(400, 40))
+        self.reg.setMinimumSize(QSize(0, 40))
+        self.reg.setMaximumSize(QSize(16777215, 40))
 
         self.verticalLayout.addWidget(self.reg)
 
