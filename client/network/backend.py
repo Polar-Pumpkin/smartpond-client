@@ -6,6 +6,7 @@ from requests.auth import AuthBase
 from requests_futures.sessions import FuturesSession
 
 from client.abstract import Singleton
+from client.config import Secrets
 from client.network.session import LiveServerSession
 
 logger = logging.getLogger(__name__)
@@ -36,12 +37,16 @@ class Backend(metaclass=Singleton):
         future.add_done_callback(self.__auth)
         return future
 
+    def auth(self, token: str):
+        self.__session.auth = TokenAuth(token)
+        logger.info('Session 已注册')
+        Secrets().set_token(token)
+
     def __auth(self, future: Future[Response]):
         response = future.result()
         if response.status_code != 200:
             return
-        self.__session.auth = TokenAuth(response.json()['token'])
-        logger.info('Session 已注册')
+        self.auth(response.json()['token'])
 
     def list_token(self) -> Future[Response]:
         return self.__client.get('/token/list')

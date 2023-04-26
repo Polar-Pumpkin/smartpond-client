@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QWidget
 from requests import Response
 
 from client.network import Backend
+from client.network.websocket import Websocket
 from client.ui import MainWindow
 from client.ui.src.impl import Ui_Centralize
 from client.ui.widget import StatusWidget, TokenWidget, NamespaceCreateWidget, NamespaceSelectWidget
@@ -132,7 +133,9 @@ class TokenPage(QWidget, Ui_Centralize):
         if response.status_code != 201:
             self.critical.emit('生成登录凭证失败')
             return
-        # TODO save token and next
+        token = response.json()['token']
+        Backend().auth(token)
+        Websocket().launch(token)
 
     def __on_select(self, name: str) -> str:
         timestamp = self.tokens[name]
