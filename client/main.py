@@ -6,6 +6,7 @@ import yaml
 from PySide6.QtWidgets import QApplication
 from qt_material import apply_stylesheet
 
+from client.network import Client, Backend
 from client.ui import MainWindow
 
 try:
@@ -15,17 +16,17 @@ except ImportError:
 
 
 def main():
-    log = logging.getLogger(__name__)
+    logger = logging.getLogger(__name__)
     with open('logging.yml', 'r') as config:
         os.makedirs('../logs', exist_ok=True)
         logging.config.dictConfig(yaml.load(config, Loader))
-        log.info('已加载日志配置文件')
+        logger.info('已加载日志配置文件')
 
     def handle_exception(exc_type, exc_value, exc_traceback):
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
             return
-        log.exception('Uncaught exception', exc_info=(exc_type, exc_value, exc_traceback))
+        logger.exception('Uncaught exception', exc_info=(exc_type, exc_value, exc_traceback))
 
     sys.excepthook = handle_exception
 
@@ -36,13 +37,18 @@ def main():
     #     log.exception('依赖库检查失败', exc_info=ex)
 
     # TODO Application Entry point
-    log.info('正在启动窗体')
+    logger.info('正在启动窗体')
     app = QApplication(sys.argv)
     apply_stylesheet(app, theme='light_blue.xml')
 
     window = MainWindow()
     window.showMaximized()
-    sys.exit(app.exec_())
+    code = app.exec_()
+    logger.info('窗体已停止运行')
+    Backend().stop()
+    Client().stop(reason='Exit').result()
+    logger.info('连接已停止')
+    sys.exit(code)
 
 
 if __name__ == '__main__':

@@ -73,7 +73,7 @@ class NamespaceSelectWidget(QWidget, Ui_NamespaceSelect):
         else:
             self.header_secondary.hide()
 
-        self.namespaces.itemClicked.connect(self.__on_selected)
+        self.namespaces.itemClicked.launch(self.__on_selected)
 
     def refresh(self, namespaces: Sequence[str]):
         self.namespaces.clear()

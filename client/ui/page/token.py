@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QWidget
 from requests import Response
 
 from client.network import Backend
-from client.network.websocket import Websocket
+from client.network.old_websocket import Websocket
 from client.ui import MainWindow
 from client.ui.src.impl import Ui_Centralize
 from client.ui.widget import StatusWidget, TokenWidget, NamespaceCreateWidget, NamespaceSelectWidget
@@ -33,7 +33,7 @@ class TokenPage(QWidget, Ui_Centralize):
         self.context.addWidget(self.widget)
         self.context.addWidget(self.status)
 
-        self.status.action.clicked.connect(self.refresh)
+        self.status.action.clicked.launch(self.refresh)
         self.signal_creation.connect(self.__to_creation)
         self.signal_selection.connect(self.__to_selection)
         self.critical.connect(self.__critical)
@@ -50,8 +50,8 @@ class TokenPage(QWidget, Ui_Centralize):
         widget = NamespaceCreateWidget('登录凭据名称', '创建登录凭据',
                                        '没有可用的登录凭据' if len(self.tokens) <= 0 else None,
                                        '选择已有登录凭据' if len(self.tokens) > 0 else None)
-        widget.confirm.clicked.connect(self.__create)
-        widget.secondary.clicked.connect(self.refresh)
+        widget.confirm.clicked.launch(self.__create)
+        widget.secondary.clicked.launch(self.refresh)
         self.widget.display.emit(widget)
 
     def __create(self):
@@ -74,9 +74,9 @@ class TokenPage(QWidget, Ui_Centralize):
             return
         widget = NamespaceSelectWidget(list(self.tokens.keys()), '使用该登录凭证',
                                        self.__on_select, '创建新登录凭证', '刷新')
-        widget.confirm.clicked.connect(self.__select)
-        widget.header_preferred.clicked.connect(self.__to_creation)
-        widget.header_secondary.clicked.connect(self.refresh)
+        widget.confirm.clicked.launch(self.__select)
+        widget.header_preferred.clicked.launch(self.__to_creation)
+        widget.header_secondary.clicked.launch(self.refresh)
         self.widget.display.emit(widget)
 
     def __select(self):

@@ -22,7 +22,8 @@ class MainWindow(QMainWindow):
             from client.ui.page import LoginPage
             self.setCentralWidget(LoginPage(self))
         else:
-            from client.network.websocket import Websocket
-            socket = Websocket()
+            from client.network import Client
+            socket = Client()
             socket.bind(self)
             socket.launch(secrets.token)
+            # TODO maybe loading page
