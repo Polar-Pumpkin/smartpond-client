@@ -1,20 +1,16 @@
 import logging
-from typing import Optional
 
-from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 
 from client.ui.src.impl import Ui_Token
+from client.ui.widget.abstract import Displayable
 
 logger = logging.getLogger(__name__)
 
 
-class TokenWidget(QWidget, Ui_Token):
-    display = Signal(QWidget)
-
+class TokenWidget(QWidget, Ui_Token, Displayable):
     def __init__(self):
         super(TokenWidget, self).__init__()
-        self.widget: Optional[QWidget] = None
         self.setupUi(self)
 
         self.display.connect(self.__set_context)

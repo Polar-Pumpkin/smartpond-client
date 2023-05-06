@@ -28,8 +28,8 @@ class LoginPage(QWidget, Ui_Centralize):
         if username is not None:
             self.widget.username.setText(username)
 
-        self.widget.reg.clicked.launch(self.__to_register)
-        self.widget.login.clicked.launch(self.__login)
+        self.widget.reg.clicked.connect(self.__to_register)
+        self.widget.login.clicked.connect(self.__login)
         self.navigate.connect(self.__to_token)
 
     def __to_register(self):

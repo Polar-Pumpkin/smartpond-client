@@ -18,7 +18,7 @@ except ImportError:
 def main():
     logger = logging.getLogger(__name__)
     with open('logging.yml', 'r') as config:
-        os.makedirs('../logs', exist_ok=True)
+        os.makedirs('logs', exist_ok=True)
         logging.config.dictConfig(yaml.load(config, Loader))
         logger.info('已加载日志配置文件')
 
@@ -44,9 +44,9 @@ def main():
     window = MainWindow()
     window.showMaximized()
     code = app.exec_()
-    logger.info('窗体已停止运行')
+    logger.info('窗体已停止')
     Backend().stop()
-    Client().stop(reason='Exit').result()
+    Client().stop(reason='Exit').result(1)
     logger.info('连接已停止')
     sys.exit(code)
 

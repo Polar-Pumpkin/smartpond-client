@@ -59,10 +59,11 @@ class Backend(metaclass=Singleton):
         future.add_done_callback(self.__auth)
         return future
 
-    def auth(self, token: str):
+    def auth(self, token: str, save: bool = False):
         self.session.auth = TokenAuth(token)
         logger.info('Session 已注册')
-        Secrets().set_token(token)
+        if save:
+            Secrets().set_token(token)
 
     def __auth(self, future: Future[Response]):
         response = future.result()

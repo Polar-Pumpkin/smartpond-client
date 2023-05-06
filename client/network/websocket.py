@@ -93,6 +93,9 @@ class Connection(Thread):
         elapsed = int((time.time() - timestamp) * 1000)
         logger.info(f'客户端已上线({elapsed}ms)')
         self.__connected.set_result(None)
+        await self.__listen()
+
+    async def __listen(self):
         async for payload in self.__client:
             if not isinstance(payload, str):
                 logger.warning(f'收到非字符串: {payload.hex()}')
@@ -136,6 +139,10 @@ class Client(metaclass=Singleton):
     def __init__(self):
         self.__window: MainWindow | None = None
         self.__connection: Connection | None = None
+
+    @property
+    def connection(self) -> Connection | None:
+        return self.__connection
 
     def bind(self, window: MainWindow):
         self.__window = window

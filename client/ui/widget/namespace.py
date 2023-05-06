@@ -52,11 +52,11 @@ class NamespaceCreateWidget(QWidget, Ui_NamespaceCreate):
 
 class NamespaceSelectWidget(QWidget, Ui_NamespaceSelect):
     def __init__(self, namespaces: Sequence[str], confirm: str,
-                 select: Callable[[str], str],
+                 show_selected: Callable[[str], str],
                  header_preferred: Optional[str] = None,
                  header_secondary: Optional[str] = None):
         super(NamespaceSelectWidget, self).__init__()
-        self.select = select
+        self.show_selected = show_selected
         self.setupUi(self)
         self.refresh(namespaces)
 
@@ -73,7 +73,7 @@ class NamespaceSelectWidget(QWidget, Ui_NamespaceSelect):
         else:
             self.header_secondary.hide()
 
-        self.namespaces.itemClicked.launch(self.__on_selected)
+        self.namespaces.itemClicked.connect(self.__on_selected)
 
     def refresh(self, namespaces: Sequence[str]):
         self.namespaces.clear()
@@ -82,7 +82,7 @@ class NamespaceSelectWidget(QWidget, Ui_NamespaceSelect):
     def __on_selected(self, item):
         if self.selected.isHidden():
             self.selected.show()
-        self.selected.setText(self.select(item.text()))
+        self.selected.setText(self.show_selected(item.text()))
         self.cached_selected = item.text()
 
     def lock(self):

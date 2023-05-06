@@ -3,6 +3,7 @@ import json
 import logging
 from abc import ABCMeta, abstractmethod
 from json import JSONEncoder, JSONDecoder
+from types import GenericAlias
 from typing import TypeVar, Any
 
 logger = logging.getLogger(__name__)
@@ -39,16 +40,6 @@ def serializable(name: str | None = None):
 
 
 class Packet:
-    def __init__(self, **kwargs):
-        if hasattr(self, '__annotations__'):
-            for key, clazz in self.__annotations__.items():
-                value = kwargs.pop(key, None)
-                if value is None or not isinstance(value, clazz):
-                    raise ValueError(f'{key} is expected to be {clazz}, but actual is {type(value)}')
-                setattr(self, key, value)
-        if len(kwargs) > 0:
-            raise NameError(f'Unknown names: {", ".join(kwargs.keys())}')
-
     def __str__(self) -> str:
         return serialize(self)
 
@@ -58,6 +49,21 @@ class Packet:
 
 
 class IncomingPacket(Packet, metaclass=ABCMeta):
+    def __init__(self, **kwargs):
+        if hasattr(self, '__annotations__'):
+            for key, clazz in self.__annotations__.items():
+                value = kwargs.pop(key, None)
+                if value is None:
+                    raise ValueError(f'{key} is required')
+                origin = clazz
+                if isinstance(clazz, GenericAlias):
+                    origin = clazz.__origin__
+                if not isinstance(value, origin):
+                    raise ValueError(f'{key} is expected to be {origin.__name__}, but actual is {type(value).__name__}')
+                setattr(self, key, value)
+        if len(kwargs) > 0:
+            raise NameError(f'Unknown names: {", ".join(kwargs.keys())}')
+
     @abstractmethod
     async def execute(self):
         raise NotImplementedError

@@ -25,8 +25,8 @@ class RegisterPage(QWidget, Ui_Centralize):
         self.context.addWidget(self.widget)
         self.context.addWidget(self.status)
 
-        self.widget.login.clicked.launch(self.__to_login)
-        self.widget.reg.clicked.launch(self.__register)
+        self.widget.login.clicked.connect(self.__to_login)
+        self.widget.reg.clicked.connect(self.__register)
         self.navigate.connect(self.__navigate_to_login)
 
     def __to_login(self):
