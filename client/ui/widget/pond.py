@@ -1,10 +1,10 @@
 from PySide6.QtWidgets import QWidget
 
-from client.ui.src.impl import Ui_Token
+from client.ui.src.impl import Ui_Pond
 from client.ui.widget.abstract import Displayable
 
 
-class TokenWidget(QWidget, Ui_Token, Displayable):
+class PondWidget(QWidget, Ui_Pond, Displayable):
     def __init__(self):
         super().__init__()
         self.setupUi(self)

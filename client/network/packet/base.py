@@ -2,7 +2,7 @@ import copy
 import json
 import logging
 from abc import ABCMeta, abstractmethod
-from json import JSONEncoder, JSONDecoder
+from json import JSONEncoder
 from types import GenericAlias
 from typing import TypeVar, Any
 
@@ -25,12 +25,12 @@ def serializable(name: str | None = None):
                         case cls if issubclass(cls, OutgoingPacket):
                             _name += 'In'
                         case _:
-                            raise TypeError(f'Cannot determine packet direction for {cls}')
+                            raise TypeError(f'无法辨别包 {cls} 的通信方向')
                     _name += cls.__name__
                 case _:
-                    raise ValueError(f'Cannot generate serializable name for {cls}')
+                    raise ValueError(f'无法生成包 {cls} 的完整名称')
         if _name is None:
-            raise ValueError('Serializable name cannot be None')
+            raise ValueError('序列化类型名称不可为 None')
         setattr(cls, 'type', _name)
         registered[_name] = cls
         logger.info('注册可序列化对象: ' + _name)
@@ -83,21 +83,18 @@ class PacketEncoder(JSONEncoder):
         return values
 
 
-class PacketDecoder(JSONDecoder):
-    def __init__(self):
-        super().__init__(object_hook=PacketDecoder.from_dict)
+def serialize(packet: Packet) -> str:
+    return json.dumps(packet, cls=PacketEncoder)
 
-    @staticmethod
+
+def deserialize(content: str, cls: type[T] | None = None) -> T | Any | None:
     def from_dict(values: dict[str, Any]):
         name = values.pop('==', None)
         if name is None or name not in registered:
             return None
         return registered[name](**values)
 
-
-def serialize(packet: Packet) -> str:
-    return json.dumps(packet, cls=PacketEncoder)
-
-
-def deserialize(content: str) -> Any | None:
-    return json.loads(content, cls=PacketDecoder)
+    if cls is None:
+        return json.loads(content, object_hook=from_dict)
+    else:
+        pass

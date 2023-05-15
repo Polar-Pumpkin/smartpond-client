@@ -1,1 +1,1 @@
-from .namespace import NamespacePage
+from .namespace import AbstractNamespacePage, HttpNamespacePage

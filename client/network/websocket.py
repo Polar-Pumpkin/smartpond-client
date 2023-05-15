@@ -141,6 +141,10 @@ class Client(metaclass=Singleton):
         self.__connection: Connection | None = None
 
     @property
+    def window(self) -> MainWindow | None:
+        return self.__window
+
+    @property
     def connection(self) -> Connection | None:
         return self.__connection
 

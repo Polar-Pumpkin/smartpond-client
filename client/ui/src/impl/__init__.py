@@ -5,3 +5,4 @@ from .namespace_select import Ui_NamespaceSelect
 from .register import Ui_Register
 from .status import Ui_Status
 from .token import Ui_Token
+from .pond import Ui_Pond
