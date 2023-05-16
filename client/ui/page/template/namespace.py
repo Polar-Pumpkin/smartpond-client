@@ -1,17 +1,17 @@
-from asyncio import Future
-
 import logging
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QWidget
 from abc import abstractmethod
-from requests import Response
+from asyncio import Future
 from typing import Dict, Any
 
+from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QWidget
+from requests import Response
+
+from client.abstract import QABCMeta
 from client.ui import MainWindow
-from client.ui.abstract import QABCMeta
 from client.ui.src.impl import Ui_Centralize
 from client.ui.widget import StatusWidget, NamespaceCreateWidget, NamespaceSelectWidget
-from client.ui.widget.abstract import Displayable
+from client.ui.widget.template import Displayable
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +58,10 @@ class AbstractNamespacePage(QWidget, Ui_Centralize, metaclass=QABCMeta):
         return len(self.namespaces)
 
     def _retry(self):
-        self.__to_selection()
+        if len(self.namespaces) <= 0:
+            self.__to_creation()
+        else:
+            self.__to_selection()
 
     def _critical(self, message: str):
         logger.warning(message)

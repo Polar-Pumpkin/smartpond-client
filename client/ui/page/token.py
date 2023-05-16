@@ -1,11 +1,11 @@
 from asyncio import Future
-
 from datetime import datetime
+
 from requests import Response
 
 from client.network import Backend, Client
 from client.ui import MainWindow
-from client.ui.page.abstract import HttpNamespacePage
+from client.ui.page.template import HttpNamespacePage
 from client.ui.widget import TokenWidget
 
 

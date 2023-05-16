@@ -1,7 +1,7 @@
 from jsonobject import StringProperty, ListProperty
 
+from client.abstract import IncomingPacket, serializable, OutgoingPacket
 from client.config import Secrets
-from client.network.packet import IncomingPacket, serializable, OutgoingPacket
 
 
 @serializable

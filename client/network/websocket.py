@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 import time
 from asyncio import Task, AbstractEventLoop
@@ -9,8 +8,8 @@ from threading import Thread
 from websockets.client import connect, WebSocketClientProtocol
 from websockets.exceptions import InvalidStatusCode
 
+from client.abstract import IncomingPacket, OutgoingPacket, serialize, deserialize
 from client.abstract import Singleton
-from client.network.packet.base import IncomingPacket, OutgoingPacket, serialize, deserialize
 from client.ui import MainWindow
 
 logger = logging.getLogger(__name__)
@@ -105,8 +104,8 @@ class Connection(Thread):
             if not isinstance(packet, IncomingPacket):
                 logger.warning(f'接收非数据包: ({name}) {payload}')
                 return
-            context = json.dumps(packet.context)
-            logger.info(f'接收: ({name}) {context}')
+            context = packet.to_json()
+            logger.info(f'<-- ({name}) {context}')
             try:
                 await packet.execute()
             except Exception as ex:
@@ -131,7 +130,7 @@ class Connection(Thread):
         if self.client is None or not self.client.open:
             logger.warning('客户端未在线, 无法发送数据')
             return
-        logger.info(f'发送: {message}')
+        logger.info(f'--> {message}')
         await self.client.send(message)
 
 

@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QWidget
 
 from client.ui.src.impl import Ui_Token
-from client.ui.widget.abstract import Displayable
+from client.ui.widget.template import Displayable
 
 
 class TokenWidget(Displayable, Ui_Token):

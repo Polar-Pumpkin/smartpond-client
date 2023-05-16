@@ -1,10 +1,10 @@
-from asyncio import Future
-
 import logging
+from asyncio import Future
+from typing import TypeVar
+
 from requests import Response, Session
 from requests.auth import AuthBase
 from requests_futures.sessions import FuturesSession
-from typing import TypeVar
 
 from client.abstract import Singleton
 from client.config import Secrets

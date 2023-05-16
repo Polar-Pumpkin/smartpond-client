@@ -8,8 +8,7 @@ from requests import Response
 from client.network import Backend
 from client.ui import MainWindow
 from client.ui.src.impl import Ui_Centralize
-from client.ui.widget import LoginWidget
-from client.ui.widget import StatusWidget
+from client.ui.widget import LoginWidget, StatusWidget
 
 
 class LoginPage(QWidget, Ui_Centralize):

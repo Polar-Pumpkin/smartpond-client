@@ -1,11 +1,11 @@
-from json import JSONEncoder
-
-import copy
 import json
 import logging
-from abc import ABCMeta, abstractmethod
-from jsonobject import JsonObject
+from json import JSONEncoder
 from typing import TypeVar, Any
+
+from jsonobject import JsonObject
+
+from client.abstract.packet import Packet, IncomingPacket, OutgoingPacket
 
 logger = logging.getLogger(__name__)
 registered: dict[str, type] = {}
@@ -37,52 +37,13 @@ def serializable(clazz: type[T]) -> type[T]:
     return clazz
 
 
-class Packet(JsonObject):
-    def __str__(self) -> str:
-        return serialize(self)
-
-    @property
-    def context(self) -> dict[str, Any]:
-        return self.__dict__
-
-
-class AbstractPacketMeta(type(JsonObject), ABCMeta):
-    pass
-
-
-class IncomingPacket(Packet, metaclass=AbstractPacketMeta):
-    # def __init__(self, *args, **kwargs):
-    #     if hasattr(self, '__annotations__'):
-    #         for key, clazz in self.__annotations__.items():
-    #             value = kwargs.pop(key, None)
-    #             if value is None:
-    #                 raise ValueError(f'{key} is required')
-    #             origin = clazz
-    #             if isinstance(clazz, GenericAlias):
-    #                 origin = clazz.__origin__
-    #             if not isinstance(value, origin):
-    #                 raise ValueError(f'期望 {key} 为 {origin.__name__}, 实际为 {type(value).__name__}')
-    #             setattr(self, key, value)
-    #     if len(kwargs) > 0:
-    #         raise NameError(f'未知名称: {", ".join(kwargs.keys())}')
-
-    @abstractmethod
-    async def execute(self):
-        raise NotImplementedError
-
-
-class OutgoingPacket(Packet):
-    pass
-
-
 class PacketEncoder(JSONEncoder):
-
     def default(self, o: Any) -> Any:
         if not (isinstance(o, Packet) and hasattr(o, 'type')):
             if isinstance(o, JsonObject):
                 return o.to_json()
             return JSONEncoder.default(self, o)
-        values = copy.deepcopy(o.__dict__)
+        values = o.to_json()
         values['=='] = getattr(o, 'type')
         return values
 

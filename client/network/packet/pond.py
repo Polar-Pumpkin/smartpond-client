@@ -1,7 +1,10 @@
 from jsonobject import ListProperty, StringProperty
 
+from client.abstract import IncomingPacket, serializable, OutgoingPacket
 from client.config import Secrets
-from client.network.packet import IncomingPacket, serializable, OutgoingPacket
+from client.network import Client
+from client.network.packet.node import RequestNodeList
+from client.ui.page import PondPage
 
 
 @serializable
@@ -9,9 +12,9 @@ class PondList(IncomingPacket):
     ponds = ListProperty(str)
 
     async def execute(self):
-        from client.network import Client
-        from client.ui.page import PondPage
-        Client().window.context.emit(PondPage(Client().window, self.ponds))
+        client = Client()
+        window = client.window
+        window.builder.emit([PondPage, window, self.ponds])
 
 
 @serializable
@@ -27,7 +30,5 @@ class PondCreationReceipt(IncomingPacket):
     pondId: StringProperty()
 
     async def execute(self):
-        from client.network import Client
-        from client.network.packet import RequestNodeList
         Secrets().set(pond_id=self.pondId)
         Client().connection.send(RequestNodeList())

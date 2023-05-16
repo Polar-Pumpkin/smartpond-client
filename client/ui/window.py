@@ -1,11 +1,16 @@
+import logging
+
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QMainWindow, QWidget
 
 from client.config import Secrets
 
+logger = logging.getLogger(__name__)
+
 
 class MainWindow(QMainWindow):
     context = Signal(QWidget)
+    builder = Signal(list)
 
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -15,6 +20,11 @@ class MainWindow(QMainWindow):
         # self.stacks = QStackedWidget(self)
         # self.stacks.addWidget(LoginWidget())
         self.context.connect(self.setCentralWidget)
+        self.builder.connect(self.build)
+
+        from client.network import Client
+        client = Client()
+        client.bind(self)
 
         secrets = Secrets()
         secrets.load()
@@ -22,8 +32,9 @@ class MainWindow(QMainWindow):
             from client.ui.page import LoginPage
             self.setCentralWidget(LoginPage(self))
         else:
-            from client.network import Client
-            socket = Client()
-            socket.bind(self)
-            socket.launch(secrets.token)
+            client.launch(secrets.token)
             # TODO maybe loading page
+
+    def build(self, args: list):
+        clazz = args.pop(0)
+        self.context.emit(clazz(*args))

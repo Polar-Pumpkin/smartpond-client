@@ -1,13 +1,13 @@
 from jsonobject import StringProperty
 
+from client.abstract import IncomingPacket, OutgoingPacket, serializable
 from client.config import Secrets
-from client.network.packet.base import serializable, IncomingPacket, OutgoingPacket
+from client.network import Client
 
 
 @serializable
 class RequestNodeRegistration(IncomingPacket):
     async def execute(self):
-        from client.network import Client
         Client().connection.send(NodeRegistration())
 
 

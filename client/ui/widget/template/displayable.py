@@ -4,7 +4,7 @@ from abc import abstractmethod
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 
-from client.ui.abstract import QABCMeta
+from client.abstract import QABCMeta
 
 logger = logging.getLogger(__name__)
 

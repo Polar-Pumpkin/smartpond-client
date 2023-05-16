@@ -6,7 +6,6 @@ import yaml
 from PySide6.QtWidgets import QApplication
 from qt_material import apply_stylesheet
 
-from client.network import Client, Backend
 from client.ui import MainWindow
 
 try:
@@ -45,9 +44,12 @@ def main():
     window.showMaximized()
     code = app.exec_()
     logger.info('窗体已停止')
+
+    from client.network import Backend, Client
     Backend().stop()
     Client().stop(reason='Exit').result(1)
     logger.info('连接已停止')
+
     sys.exit(code)
 
 
