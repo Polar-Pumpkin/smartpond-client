@@ -1,14 +1,16 @@
-import logging
 from asyncio import Future
 
+import logging
 from requests import Response, Session
 from requests.auth import AuthBase
 from requests_futures.sessions import FuturesSession
+from typing import TypeVar
 
 from client.abstract import Singleton
 from client.config import Secrets
 
 logger = logging.getLogger(__name__)
+T = TypeVar('T')
 
 
 class LiveServerSession(Session):
@@ -48,12 +50,31 @@ class Backend(metaclass=Singleton):
     def stop(self):
         self.client.close()
 
+    @staticmethod
+    def __watch(func):
+        def on_exception(value: Future):
+            ex = value.exception()
+            if ex is not None:
+                logger.critical(f'处理 Future 时遇到错误: {ex}', exc_info=ex)
+            else:
+                logger.info('Future 正常结束')
+
+        def watched(*args, **kwargs):
+            future = func(*args, **kwargs)
+            future.add_done_callback(on_exception)
+            return future
+
+        return watched
+
+    @__watch
     def is_username_available(self, name: str) -> Future[Response]:
         return self.client.get('/user/available', data=name)
 
+    @__watch
     def reg(self, username: str, password: str) -> Future[Response]:
         return self.client.post('/user/reg', json={'username': username, 'password': password})
 
+    @__watch
     def login(self, username: str, password: str) -> Future[Response]:
         future = self.client.post('/user/auth', json={'username': username, 'password': password})
         future.add_done_callback(self.__auth)
@@ -63,7 +84,7 @@ class Backend(metaclass=Singleton):
         self.session.auth = TokenAuth(token)
         logger.info('Session 已注册')
         if save:
-            Secrets().set_token(token)
+            Secrets().set(token=token)
 
     def __auth(self, future: Future[Response]):
         response = future.result()
@@ -71,14 +92,18 @@ class Backend(metaclass=Singleton):
             return
         self.auth(response.json()['token'])
 
+    @__watch
     def list_token(self) -> Future[Response]:
         return self.client.get('/token/list')
 
+    @__watch
     def is_token_available(self, name: str) -> Future[Response]:
         return self.client.get('/token/available', data=name)
 
+    @__watch
     def create_token(self, name: str) -> Future[Response]:
         return self.client.post('/token/create', data=name)
 
+    @__watch
     def generate_token(self, name: str) -> Future[Response]:
         return self.client.get('/token/generate/constant', data=name)

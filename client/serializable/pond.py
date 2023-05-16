@@ -1,14 +1,10 @@
-from datetime import datetime
-from typing import List
-
-from client.network.packet import serializable
+from jsonobject import JsonObject, StringProperty, ListProperty, BooleanProperty, DateTimeProperty
 
 
-@serializable()
-class Pond:
-    _id: str
-    name: str
-    owner: str
-    collaborators: List[str]
-    activated: bool
-    created: datetime
+class Pond(JsonObject):
+    _id: StringProperty()
+    name: StringProperty()
+    owner: StringProperty()
+    collaborators: ListProperty(str)
+    activated: BooleanProperty()
+    created: DateTimeProperty(exact=True)

@@ -1,31 +1,37 @@
+from jsonobject import StringProperty, ListProperty
+
 from client.config import Secrets
 from client.network.packet import IncomingPacket, serializable, OutgoingPacket
 
 
-@serializable()
+@serializable
 class RequestNodeList(OutgoingPacket):
+    pondId = StringProperty()
+
     def __init__(self, pond_id: str = Secrets().pond_id):
-        self.pondId = pond_id
+        super().__init__(pondId=pond_id)
 
 
-@serializable()
+@serializable
 class NodeList(IncomingPacket):
-    nodes: list[str]
+    nodes: ListProperty(str)
 
     async def execute(self):
         # TODO go to node page
         pass
 
 
-@serializable()
+@serializable
 class NodeCreation(OutgoingPacket):
+    pondId = StringProperty()
+    name = StringProperty()
+    signature = StringProperty()
+
     def __init__(self, name: str, pond_id: str = Secrets().pond_id, signature: str = Secrets().signature):
-        self.pondId = pond_id
-        self.name = name
-        self.signature = signature
+        super().__init__(pondId=pond_id, name=name, signature=signature)
 
 
-@serializable()
+@serializable
 class NodeProfile(IncomingPacket):
     async def execute(self):
         pass

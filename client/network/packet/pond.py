@@ -1,27 +1,33 @@
+from jsonobject import ListProperty, StringProperty
+
 from client.config import Secrets
-from client.network import Client
-from client.network.packet import IncomingPacket, serializable, OutgoingPacket, RequestNodeList
-from client.ui.page import PondPage
+from client.network.packet import IncomingPacket, serializable, OutgoingPacket
 
 
-@serializable()
+@serializable
 class PondList(IncomingPacket):
-    ponds: list[str]
+    ponds = ListProperty(str)
 
     async def execute(self):
+        from client.network import Client
+        from client.ui.page import PondPage
         Client().window.context.emit(PondPage(Client().window, self.ponds))
 
 
-@serializable()
+@serializable
 class PondCreation(OutgoingPacket):
+    name = StringProperty()
+
     def __init__(self, name: str):
-        self.name = name
+        super().__init__(name=name)
 
 
-@serializable()
+@serializable
 class PondCreationReceipt(IncomingPacket):
-    pondId: str
+    pondId: StringProperty()
 
     async def execute(self):
+        from client.network import Client
+        from client.network.packet import RequestNodeList
         Secrets().set(pond_id=self.pondId)
         Client().connection.send(RequestNodeList())

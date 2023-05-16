@@ -1,6 +1,6 @@
 from asyncio import Future
-from datetime import datetime
 
+from datetime import datetime
 from requests import Response
 
 from client.network import Backend, Client
@@ -18,7 +18,7 @@ class TokenPage(HttpNamespacePage):
 
     def _extract(self, response: Response):
         for token in response.json()['tokens']:
-            self.namespaces[token['name']] = datetime.fromtimestamp(token['timestamp'] / 1000)
+            self.namespaces[token['name']] = datetime.strptime(token['timestamp'], '%Y-%m-%dT%H:%M:%S.%f%z')
 
     def _is_namespace_available(self, name: str) -> Future[Response]:
         return Backend().is_token_available(name)

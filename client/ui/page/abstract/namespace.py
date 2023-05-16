@@ -1,11 +1,11 @@
-import logging
-from abc import abstractmethod
 from asyncio import Future
-from typing import Dict, Any
 
+import logging
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
+from abc import abstractmethod
 from requests import Response
+from typing import Dict, Any
 
 from client.ui import MainWindow
 from client.ui.abstract import QABCMeta
@@ -61,9 +61,11 @@ class AbstractNamespacePage(QWidget, Ui_Centralize, metaclass=QABCMeta):
         self.__to_selection()
 
     def _critical(self, message: str):
+        logger.warning(message)
         self.status.show_message(message, False, '重试')
 
     def __to_creation(self):
+        logger.info('切换至命名空间创建页面')
         widget = NamespaceCreateWidget(self.creation_placeholder.format(name=self.name),
                                        self.creation_confirm.format(name=self.name),
                                        self.creation_title.format(name=self.name) if self.length <= 0 else None,
@@ -73,6 +75,7 @@ class AbstractNamespacePage(QWidget, Ui_Centralize, metaclass=QABCMeta):
         self.displayable.display.emit(widget)
 
     def __create(self):
+        logger.info('执行命名空间创建')
         creation = self.displayable.widget
         if not isinstance(creation, NamespaceCreateWidget):
             self._critical('异常状态')
@@ -84,6 +87,7 @@ class AbstractNamespacePage(QWidget, Ui_Centralize, metaclass=QABCMeta):
             self.status.show_message('请输入' + self.creation_placeholder.format(name=self.name))
             creation.unlock()
             return
+        logger.info(f'准备创建命名空间: {creation.cached_name}')
         self._create(creation.cached_name)
 
     @abstractmethod
@@ -91,6 +95,7 @@ class AbstractNamespacePage(QWidget, Ui_Centralize, metaclass=QABCMeta):
         raise NotImplementedError
 
     def __to_selection(self):
+        logger.info('切换至命名空间选择页面')
         if len(self.namespaces) <= 0:
             self.signal_creation.emit()
             return
@@ -109,6 +114,7 @@ class AbstractNamespacePage(QWidget, Ui_Centralize, metaclass=QABCMeta):
         raise NotImplementedError
 
     def __select(self):
+        logger.info('执行命名空间选择')
         selection = self.displayable.widget
         if not isinstance(selection, NamespaceSelectWidget):
             self._critical('异常状态')
@@ -116,6 +122,7 @@ class AbstractNamespacePage(QWidget, Ui_Centralize, metaclass=QABCMeta):
         self.status.hide_message()
         self.status.show_bar()
         selection.lock()
+        logger.info(f'准备选择命名空间: {selection.cached_selected}')
         self._select(selection.cached_selected)
 
     @abstractmethod
@@ -134,6 +141,7 @@ class HttpNamespacePage(AbstractNamespacePage):
         raise NotImplementedError
 
     def __list_callback(self, future: Future[Response]):
+        logger.info('已通过 HTTP 获取命名空间列表')
         response = future.result()
         self.status.hide_all()
         self.namespaces.clear()
@@ -148,6 +156,7 @@ class HttpNamespacePage(AbstractNamespacePage):
         raise NotImplementedError
 
     def _create(self, name: str):
+        logger.info('通过 HTTP 创建命名空间')
         self._is_namespace_available(name).add_done_callback(self.__available_callback)
 
     @abstractmethod
@@ -155,6 +164,7 @@ class HttpNamespacePage(AbstractNamespacePage):
         raise NotImplementedError
 
     def __available_callback(self, future: Future[Response]):
+        logger.info('已通过 HTTP 确认命名空间名称可用性')
         response = future.result()
         payload = response.json()
         name = payload['name']
@@ -175,6 +185,7 @@ class HttpNamespacePage(AbstractNamespacePage):
         raise NotImplementedError
 
     def __create_callback(self, future: Future[Response]):
+        logger.info('已通过 HTTP 创建命名空间')
         creation = self.displayable.widget
         if not isinstance(creation, NamespaceCreateWidget):
             self.critical.emit('异常状态')
@@ -191,6 +202,7 @@ class HttpNamespacePage(AbstractNamespacePage):
         raise NotImplementedError
 
     def _select(self, name: str):
+        logger.info('通过 HTTP 选择命名空间')
         self._on_select(name).add_done_callback(self._after_select)
 
     @abstractmethod
