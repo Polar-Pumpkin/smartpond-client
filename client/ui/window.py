@@ -3,7 +3,7 @@ import logging
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QMainWindow, QWidget
 
-from client.config import Secrets
+from client.config.secrets import Secrets
 
 logger = logging.getLogger(__name__)
 
@@ -22,14 +22,14 @@ class MainWindow(QMainWindow):
         self.context.connect(self.setCentralWidget)
         self.builder.connect(self.build)
 
-        from client.network import Client
+        from client.network.websocket import Client
         client = Client()
         client.bind(self)
 
         secrets = Secrets()
         secrets.load()
         if secrets.token is None:
-            from client.ui.page import LoginPage
+            from client.ui.page.login import LoginPage
             self.setCentralWidget(LoginPage(self))
         else:
             client.launch(secrets.token)

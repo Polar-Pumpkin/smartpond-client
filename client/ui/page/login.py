@@ -5,10 +5,11 @@ from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 from requests import Response
 
-from client.network import Backend
-from client.ui import MainWindow
-from client.ui.src.impl import Ui_Centralize
-from client.ui.widget import LoginWidget, StatusWidget
+from client.network.backend import Backend
+from client.ui.src.impl.centralize import Ui_Centralize
+from client.ui.widget.common import StatusWidget
+from client.ui.widget.login import LoginWidget
+from client.ui.window import MainWindow
 
 
 class LoginPage(QWidget, Ui_Centralize):
@@ -52,7 +53,7 @@ class LoginPage(QWidget, Ui_Centralize):
         self.widget.status_reset()
 
     def __to_token(self):
-        from client.ui.page import TokenPage
+        from client.ui.page.token import TokenPage
         self.window.context.emit(TokenPage(self.window))
 
     def __login_callback(self, future: Future[Response]):

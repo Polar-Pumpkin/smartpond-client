@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 
 from PySide6.QtWidgets import QWidget
 
-from client.ui.src.impl import Ui_Register
+from client.ui.src.impl.register import Ui_Register
 
 logger = logging.getLogger(__name__)
 

@@ -8,9 +8,8 @@ from threading import Thread
 from websockets.client import connect, WebSocketClientProtocol
 from websockets.exceptions import InvalidStatusCode
 
-from client.abstract import IncomingPacket, OutgoingPacket, serialize, deserialize
-from client.abstract import Singleton
-from client.ui import MainWindow
+from client.abstract.meta import Singleton
+from client.ui.window import MainWindow
 
 logger = logging.getLogger(__name__)
 
@@ -61,13 +60,16 @@ class Connection(Thread):
         # self.loop.create_task(self.__offline(code, reason))
         return asyncio.run_coroutine_threadsafe(self.__offline(code, reason), self.loop)
 
-    def send(self, packet: OutgoingPacket) -> Future[None]:
+    def send(self, packet) -> Future[None]:
+        from client.abstract.packet import OutgoingPacket
+        assert isinstance(packet, OutgoingPacket), '无效的 packet 对象'
         if not self.is_alive():
             logger.info('线程已经结束, 无法发送数据')
             future = Future()
             future.set_result(None)
             return future
         # self.loop.create_task(self.__send(message))
+        from client.abstract.serialize import serialize
         return asyncio.run_coroutine_threadsafe(self.__send(serialize(packet)), self.loop)
 
     async def __online(self):
@@ -83,7 +85,7 @@ class Connection(Thread):
             if isinstance(ex, InvalidStatusCode) and ex.status_code == 401:
                 logger.info('登录凭证已失效')
                 if self.window is not None:
-                    from client.ui.page import LoginPage
+                    from client.ui.page.login import LoginPage
                     self.window.context.emit(LoginPage(self.window))
                 return
             logger.critical(f'上线时遇到错误: {ex}', exc_info=ex)
@@ -95,19 +97,21 @@ class Connection(Thread):
         await self.__listen()
 
     async def __listen(self):
+        from client.abstract.serialize import deserialize
+        from client.abstract.packet import IncomingPacket
         async for payload in self.__client:
             if not isinstance(payload, str):
                 logger.warning(f'收到非字符串: {payload.hex()}')
-                return
+                continue
             packet = deserialize(payload)
             name = type(packet).__name__
             if not isinstance(packet, IncomingPacket):
                 logger.warning(f'接收非数据包: ({name}) {payload}')
-                return
+                continue
             context = packet.to_json()
             logger.info(f'<-- ({name}) {context}')
             try:
-                await packet.execute()
+                await packet.execute(self, Client(), self.window)
             except Exception as ex:
                 logger.error(f'执行数据包时遇到错误: {ex}', exc_info=ex)
                 # TODO maybe message box

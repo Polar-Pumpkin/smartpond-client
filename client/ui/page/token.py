@@ -3,10 +3,11 @@ from datetime import datetime
 
 from requests import Response
 
-from client.network import Backend, Client
-from client.ui import MainWindow
-from client.ui.page.template import HttpNamespacePage
-from client.ui.widget import TokenWidget
+from client.network.backend import Backend
+from client.network.websocket import Client
+from client.ui.page.template.namespace import HttpNamespacePage
+from client.ui.widget.token import TokenWidget
+from client.ui.window import MainWindow
 
 
 class TokenPage(HttpNamespacePage):

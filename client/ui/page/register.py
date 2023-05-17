@@ -5,10 +5,11 @@ from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 from requests import Response
 
-from client.network import Backend
-from client.ui import MainWindow
-from client.ui.src.impl import Ui_Centralize
-from client.ui.widget import RegisterWidget, StatusWidget
+from client.network.backend import Backend
+from client.ui.src.impl.centralize import Ui_Centralize
+from client.ui.widget.common import StatusWidget
+from client.ui.widget.register import RegisterWidget
+from client.ui.window import MainWindow
 
 
 class RegisterPage(QWidget, Ui_Centralize):

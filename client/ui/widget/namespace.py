@@ -3,7 +3,8 @@ from typing import Optional, Sequence, Callable
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 
-from client.ui.src.impl import Ui_NamespaceCreate, Ui_NamespaceSelect
+from client.ui.src.impl.namespace_create import Ui_NamespaceCreate
+from client.ui.src.impl.namespace_select import Ui_NamespaceSelect
 
 
 class NamespaceCreateWidget(QWidget, Ui_NamespaceCreate):

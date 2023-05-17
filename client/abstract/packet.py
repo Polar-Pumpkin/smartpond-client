@@ -4,6 +4,8 @@ from typing import Any
 from jsonobject import JsonObject
 
 from client.abstract.meta import JsonABCMeta
+from client.network.websocket import Connection, Client
+from client.ui.window import MainWindow
 
 
 class Packet(JsonObject):
@@ -33,7 +35,7 @@ class IncomingPacket(Packet, metaclass=JsonABCMeta):
     #         raise NameError(f'未知名称: {", ".join(kwargs.keys())}')
 
     @abstractmethod
-    async def execute(self):
+    async def execute(self, connection: Connection, client: Client, window: MainWindow):
         raise NotImplementedError
 
 

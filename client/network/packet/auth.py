@@ -1,14 +1,16 @@
 from jsonobject import StringProperty
 
-from client.abstract import IncomingPacket, OutgoingPacket, serializable
-from client.config import Secrets
-from client.network import Client
+from client.abstract.packet import IncomingPacket, OutgoingPacket
+from client.abstract.serialize import serializable
+from client.config.secrets import Secrets
+from client.network.websocket import Connection, Client
+from client.ui.window import MainWindow
 
 
 @serializable
 class RequestNodeRegistration(IncomingPacket):
-    async def execute(self):
-        Client().connection.send(NodeRegistration())
+    async def execute(self, connection: Connection, client: Client, window: MainWindow):
+        connection.send(NodeRegistration())
 
 
 @serializable

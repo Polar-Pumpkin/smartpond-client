@@ -5,7 +5,7 @@ from typing import Optional
 
 import machineid
 
-from client.abstract import Singleton
+from client.abstract.meta import Singleton
 
 logger = logging.getLogger(__name__)
 

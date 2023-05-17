@@ -6,8 +6,8 @@ from requests import Response, Session
 from requests.auth import AuthBase
 from requests_futures.sessions import FuturesSession
 
-from client.abstract import Singleton
-from client.config import Secrets
+from client.abstract.meta import Singleton
+from client.config.secrets import Secrets
 
 logger = logging.getLogger(__name__)
 T = TypeVar('T')

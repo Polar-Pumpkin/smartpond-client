@@ -7,11 +7,12 @@ from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 from requests import Response
 
-from client.abstract import QABCMeta
-from client.ui import MainWindow
-from client.ui.src.impl import Ui_Centralize
-from client.ui.widget import StatusWidget, NamespaceCreateWidget, NamespaceSelectWidget
-from client.ui.widget.template import Displayable
+from client.abstract.meta import QABCMeta
+from client.ui.src.impl.centralize import Ui_Centralize
+from client.ui.widget.common import StatusWidget
+from client.ui.widget.namespace import NamespaceCreateWidget, NamespaceSelectWidget
+from client.ui.widget.template.displayable import Displayable
+from client.ui.window import MainWindow
 
 logger = logging.getLogger(__name__)
 

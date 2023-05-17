@@ -1,7 +1,10 @@
 from jsonobject import StringProperty, ListProperty
 
-from client.abstract import IncomingPacket, serializable, OutgoingPacket
-from client.config import Secrets
+from client.abstract.packet import IncomingPacket, OutgoingPacket
+from client.abstract.serialize import serializable
+from client.config.secrets import Secrets
+from client.network.websocket import Connection, Client
+from client.ui.window import MainWindow
 
 
 @serializable
@@ -16,7 +19,7 @@ class RequestNodeList(OutgoingPacket):
 class NodeList(IncomingPacket):
     nodes: ListProperty(str)
 
-    async def execute(self):
+    async def execute(self, connection: Connection, client: Client, window: MainWindow):
         # TODO go to node page
         pass
 
@@ -33,5 +36,6 @@ class NodeCreation(OutgoingPacket):
 
 @serializable
 class NodeProfile(IncomingPacket):
-    async def execute(self):
+    async def execute(self, connection: Connection, client: Client, window: MainWindow):
+        # TODO go to main page
         pass

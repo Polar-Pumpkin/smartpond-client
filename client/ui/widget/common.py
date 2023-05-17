@@ -4,7 +4,7 @@ from typing import Optional
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtWidgets import QWidget
 
-from client.ui.src.impl import Ui_Status
+from client.ui.src.impl.status import Ui_Status
 
 logger = logging.getLogger(__name__)
 

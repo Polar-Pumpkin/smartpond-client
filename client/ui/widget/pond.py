@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QWidget
 
-from client.ui.src.impl import Ui_Pond
-from client.ui.widget.template import Displayable
+from client.ui.src.impl.pond import Ui_Pond
+from client.ui.widget.template.displayable import Displayable
 
 
 class PondWidget(Displayable, Ui_Pond):

@@ -6,8 +6,6 @@ import yaml
 from PySide6.QtWidgets import QApplication
 from qt_material import apply_stylesheet
 
-from client.ui import MainWindow
-
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
@@ -35,17 +33,22 @@ def main():
     # except CalledProcessError as ex:
     #     log.exception('依赖库检查失败', exc_info=ex)
 
-    # TODO Application Entry point
+    # 加载所有包
+    # noinspection PyUnresolvedReferences
+    import client.network.packet
+
     logger.info('正在启动窗体')
     app = QApplication(sys.argv)
     apply_stylesheet(app, theme='light_blue.xml')
 
+    from client.ui.window import MainWindow
     window = MainWindow()
     window.showMaximized()
     code = app.exec_()
     logger.info('窗体已停止')
 
-    from client.network import Backend, Client
+    from client.network.backend import Backend
+    from client.network.websocket import Client
     Backend().stop()
     Client().stop(reason='Exit').result(1)
     logger.info('连接已停止')
