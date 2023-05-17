@@ -1,3 +1,4 @@
+import logging
 from typing import Optional, Sequence, Callable
 
 from PySide6.QtCore import Signal
@@ -5,6 +6,8 @@ from PySide6.QtWidgets import QWidget
 
 from client.ui.src.impl.namespace_create import Ui_NamespaceCreate
 from client.ui.src.impl.namespace_select import Ui_NamespaceSelect
+
+logger = logging.getLogger(__name__)
 
 
 class NamespaceCreateWidget(QWidget, Ui_NamespaceCreate):
@@ -80,10 +83,12 @@ class NamespaceSelectWidget(QWidget, Ui_NamespaceSelect):
         self.namespaces.addItems(namespaces)
 
     def __on_selected(self, item):
+        text = item.text()
+        logger.info(f'选中命名空间: {text}')
         if self.selected.isHidden():
             self.selected.show()
-        self.selected.setText(self.show_selected(item.text()))
-        self.cached_selected = item.text()
+        self.selected.setText(self.show_selected(text))
+        self.cached_selected = text
 
     def lock(self):
         self.header_preferred.setEnabled(False)

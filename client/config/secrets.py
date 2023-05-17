@@ -1,3 +1,4 @@
+import copy
 import json
 import logging
 import os.path
@@ -17,10 +18,10 @@ class Secrets(metaclass=Singleton):
         self.signature: str = machineid.hashed_id('smartpond')
 
     def save(self):
-        secrets = self.__dict__
-        secrets.pop('signature')
+        values = copy.deepcopy(self.__dict__)
+        values.pop('signature', None)
         with open('.secrets', 'w') as file:
-            file.write(json.dumps(secrets))
+            file.write(json.dumps(values))
         logger.info('已保存 Secrets')
 
     def load(self):

@@ -4,12 +4,13 @@ from client.abstract.packet import IncomingPacket, OutgoingPacket
 from client.abstract.serialize import serializable
 from client.config.secrets import Secrets
 from client.network.websocket import Connection, Client
+from client.serializable import Pond
 from client.ui.window import MainWindow
 
 
 @serializable
 class PondList(IncomingPacket):
-    ponds = ListProperty(str)
+    ponds = ListProperty(Pond)
 
     async def execute(self, connection: Connection, client: Client, window: MainWindow):
         from client.ui.page.pond import PondPage
@@ -31,4 +32,4 @@ class PondCreationReceipt(IncomingPacket):
     async def execute(self, connection: Connection, client: Client, window: MainWindow):
         from client.network.packet import RequestNodeList
         Secrets().set(pond_id=self.pondId)
-        connection.send(RequestNodeList())
+        connection.send(RequestNodeList(Secrets().pond_id))

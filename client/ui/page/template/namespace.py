@@ -108,7 +108,7 @@ class AbstractNamespacePage(QWidget, Ui_Centralize, metaclass=QABCMeta):
                                        self._show_selected,
                                        self.selection_preferred.format(name=self.name),
                                        self.selection_secondary.format(name=self.name))
-        widget.confirm.clicked.connect(self._select)
+        widget.confirm.clicked.connect(self.__select)
         widget.header_preferred.clicked.connect(self.__to_creation)
         widget.header_secondary.clicked.connect(self._retry)
         self.displayable.display.emit(widget)

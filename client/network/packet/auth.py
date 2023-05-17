@@ -10,12 +10,12 @@ from client.ui.window import MainWindow
 @serializable
 class RequestNodeRegistration(IncomingPacket):
     async def execute(self, connection: Connection, client: Client, window: MainWindow):
-        connection.send(NodeRegistration())
+        connection.send(NodeRegistration(Secrets().signature))
 
 
 @serializable
 class NodeRegistration(OutgoingPacket):
     signature = StringProperty()
 
-    def __init__(self, signature: str = Secrets().signature):
+    def __init__(self, signature: str):
         super().__init__(signature=signature)

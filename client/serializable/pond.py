@@ -2,9 +2,9 @@ from jsonobject import JsonObject, StringProperty, ListProperty, BooleanProperty
 
 
 class Pond(JsonObject):
-    _id: StringProperty()
-    name: StringProperty()
-    owner: StringProperty()
-    collaborators: ListProperty(str)
-    activated: BooleanProperty()
-    created: DateTimeProperty(exact=True)
+    id = StringProperty(name='_id')
+    name = StringProperty()
+    owner = StringProperty()
+    collaborators = ListProperty(str)
+    activated = BooleanProperty()
+    created = DateTimeProperty(exact=True)

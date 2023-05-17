@@ -46,6 +46,6 @@ class TokenPage(HttpNamespacePage):
             self.critical.emit('生成登录凭证失败')
             return
         token = response.json()['token']
-        Backend().auth(token)
+        Backend().auth(token, True)
         Client().launch(token)
         self.status.emit_message('正在连接服务器', True)

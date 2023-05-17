@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 import time
 from asyncio import Task, AbstractEventLoop
@@ -61,6 +62,7 @@ class Connection(Thread):
         return asyncio.run_coroutine_threadsafe(self.__offline(code, reason), self.loop)
 
     def send(self, packet) -> Future[None]:
+        name = type(packet).__name__
         from client.abstract.packet import OutgoingPacket
         assert isinstance(packet, OutgoingPacket), '无效的 packet 对象'
         if not self.is_alive():
@@ -70,7 +72,7 @@ class Connection(Thread):
             return future
         # self.loop.create_task(self.__send(message))
         from client.abstract.serialize import serialize
-        return asyncio.run_coroutine_threadsafe(self.__send(serialize(packet)), self.loop)
+        return asyncio.run_coroutine_threadsafe(self.__send(serialize(packet), name), self.loop)
 
     async def __online(self):
         if self.client is not None:
@@ -101,15 +103,15 @@ class Connection(Thread):
         from client.abstract.packet import IncomingPacket
         async for payload in self.__client:
             if not isinstance(payload, str):
-                logger.warning(f'收到非字符串: {payload.hex()}')
+                logger.warning(f'<!- {payload.hex()}')
                 continue
             packet = deserialize(payload)
             name = type(packet).__name__
             if not isinstance(packet, IncomingPacket):
-                logger.warning(f'接收非数据包: ({name}) {payload}')
+                logger.warning(f'<!- ({name}) {payload}')
                 continue
-            context = packet.to_json()
-            logger.info(f'<-- ({name}) {context}')
+            logger.info(f'<-- ({name}) {payload}')
+            logger.info(str(packet.to_json()))
             try:
                 await packet.execute(self, Client(), self.window)
             except Exception as ex:
@@ -130,11 +132,11 @@ class Connection(Thread):
         elapsed = int((time.time() - timestamp) * 1000)
         logger.info(f'客户端已离线({elapsed}ms)')
 
-    async def __send(self, message: str):
+    async def __send(self, message: str, name: str = 'PlainText'):
         if self.client is None or not self.client.open:
             logger.warning('客户端未在线, 无法发送数据')
             return
-        logger.info(f'--> {message}')
+        logger.info(f'--> ({name}) {message}')
         await self.client.send(message)
 
 

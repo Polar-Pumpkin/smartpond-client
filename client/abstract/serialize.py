@@ -56,7 +56,7 @@ def deserialize(content: str, clazz: type[T] | None = None) -> T | Any | None:
     def from_dict(values: dict[str, Any]):
         name = values.pop('==', None)
         if name is None or name not in registered:
-            return None
+            return values
         target = registered[name]
         if issubclass(target, JsonObject):
             return target(values)
@@ -66,6 +66,6 @@ def deserialize(content: str, clazz: type[T] | None = None) -> T | Any | None:
     if clazz is None:
         return json.loads(content, object_hook=from_dict)
     elif issubclass(clazz, JsonObject):
-        return clazz(content)
+        return clazz(json.loads(content))
     else:
         return None
