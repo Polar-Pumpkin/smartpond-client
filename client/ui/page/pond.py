@@ -1,6 +1,6 @@
 from typing import List
 
-from client.config.secrets import Secrets
+from client.config.cached import Cached
 from client.network.packet.node import RequestNodeList
 from client.network.packet.pond import PondCreation
 from client.network.websocket import Client
@@ -20,8 +20,8 @@ class PondPage(AbstractNamespacePage):
 
     def _select(self, name: str):
         self.status.show_message(f'正在与服务器通信', True)
-        Secrets().set(pond_id=self.namespaces[name].id)
-        Client().connection.send(RequestNodeList(Secrets().pond_id))
+        Cached().pond_id = self.namespaces[name].id
+        Client().connection.send(RequestNodeList(Cached().pond_id))
 
     def _show_selected(self, name: str) -> str:
         timestamp = self.namespaces[name].created.strftime("%Y-%m-%d %H:%M:%S")

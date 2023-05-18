@@ -13,7 +13,7 @@ class MainWindow(QMainWindow):
     builder = Signal(list)
 
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
         # 设置窗口标题
         self.setWindowTitle('智慧鱼塘')
 

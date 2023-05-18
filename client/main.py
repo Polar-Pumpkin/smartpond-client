@@ -2,9 +2,9 @@ import logging.config
 import os
 import sys
 
+import qdarktheme
 import yaml
 from PySide6.QtWidgets import QApplication
-from qt_material import apply_stylesheet
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
@@ -39,7 +39,8 @@ def main():
 
     logger.info('正在启动窗体')
     app = QApplication(sys.argv)
-    apply_stylesheet(app, theme='light_blue.xml')
+    # apply_stylesheet(app, theme='dark_blue.xml')
+    qdarktheme.setup_theme('auto')
 
     from client.ui.window import MainWindow
     window = MainWindow()

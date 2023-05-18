@@ -2,6 +2,7 @@ from jsonobject import StringProperty, ListProperty, ObjectProperty, SetProperty
 
 from client.abstract.packet import IncomingPacket, OutgoingPacket
 from client.abstract.serialize import serializable
+from client.config.cached import Cached
 from client.network.websocket import Connection, Client
 from client.serializable import Pond, Node, Sensor, SensorStructure
 from client.ui.window import MainWindow
@@ -46,11 +47,13 @@ class RequestProfile(OutgoingPacket):
 
 @serializable
 class Profile(IncomingPacket):
+    username = StringProperty()
     pond = ObjectProperty(Pond)
     node = ObjectProperty(Node)
     sensors = ListProperty(Sensor)
     structures = SetProperty(SensorStructure)
 
     async def execute(self, connection: Connection, client: Client, window: MainWindow):
-        # TODO go to main page
-        pass
+        Cached().profile = self
+        from client.ui.page.dashboard import DashboardPage
+        window.builder.emit([DashboardPage])

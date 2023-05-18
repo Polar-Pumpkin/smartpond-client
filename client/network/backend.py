@@ -7,6 +7,7 @@ from requests.auth import AuthBase
 from requests_futures.sessions import FuturesSession
 
 from client.abstract.meta import Singleton
+from client.config.cached import Cached
 from client.config.secrets import Secrets
 
 logger = logging.getLogger(__name__)

@@ -61,6 +61,10 @@ class Ui_NamespaceSelect(object):
 
         self.namespaces = QListWidget(NamespaceSelect)
         self.namespaces.setObjectName(u"namespaces")
+        font1 = QFont()
+        font1.setPointSize(13)
+        self.namespaces.setFont(font1)
+        self.namespaces.setSpacing(5)
 
         self.verticalLayout.addWidget(self.namespaces)
 

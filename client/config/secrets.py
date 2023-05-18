@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 class Secrets(metaclass=Singleton):
     def __init__(self):
         self.token: Optional[str] = None
-        self.pond_id: Optional[str] = None
         self.signature: str = machineid.hashed_id('smartpond')
 
     def save(self):
