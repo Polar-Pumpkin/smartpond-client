@@ -69,13 +69,22 @@ class DashboardPage(QWidget):
         self.username.setFont(username_font)
         self.username.setAlignment(Qt.AlignmentFlag.AlignRight)
 
-        self.grid = QGridLayout()
+        # self.grid = QGridLayout()
+        # self.context.addLayout(self.grid)
+        # self.grid.setSpacing(10)
+        # self.grid.setObjectName('grid')
+        # self.grid.setContentsMargins(10, 10, 10, 10)
+
+        self.grid =  QVBoxLayout()
         self.context.addLayout(self.grid)
         self.grid.setSpacing(10)
         self.grid.setObjectName('grid')
         self.grid.setContentsMargins(10, 10, 10, 10)
 
         # TODO 添加传感器 Widget
+        profile = Cached().profile
+        if profile is not None:
+            profile.sensors
 
         self.create = QPushButton('添加新传感器')
         self.grid.addWidget(self.create, 0, 0, 1, 4)

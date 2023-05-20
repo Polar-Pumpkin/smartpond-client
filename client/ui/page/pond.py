@@ -1,10 +1,10 @@
 from typing import List
 
 from client.config.cached import Cached
-from client.network.packet.node import RequestNodeList
-from client.network.packet.pond import PondCreation
+from client.network.serializable.packet.node import RequestNodeList
+from client.network.serializable.packet.pond import PondCreation
 from client.network.websocket import Client
-from client.serializable import Pond
+from client.network.serializable import Pond
 from client.ui.page.template.namespace import AbstractNamespacePage
 from client.ui.widget.pond import PondWidget
 from client.ui.window import MainWindow

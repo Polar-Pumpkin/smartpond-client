@@ -1,10 +1,13 @@
 import logging.config
 import os
 import sys
+import threading
 
 import qdarktheme
 import yaml
 from PySide6.QtWidgets import QApplication
+
+from client.util import handle_exception
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
@@ -19,13 +22,8 @@ def main():
         logging.config.dictConfig(yaml.load(config, Loader))
         logger.info('已加载日志配置文件')
 
-    def handle_exception(exc_type, exc_value, exc_traceback):
-        if issubclass(exc_type, KeyboardInterrupt):
-            sys.__excepthook__(exc_type, exc_value, exc_traceback)
-            return
-        logger.exception('Uncaught exception', exc_info=(exc_type, exc_value, exc_traceback))
-
     sys.excepthook = handle_exception
+    # threading.excepthook = handle_exception
 
     # log.info('检查依赖库可用性')
     # try:
@@ -33,9 +31,9 @@ def main():
     # except CalledProcessError as ex:
     #     log.exception('依赖库检查失败', exc_info=ex)
 
-    # 加载所有包
+    # 加载所有 Websocket 数据包
     # noinspection PyUnresolvedReferences
-    import client.network.packet
+    import client.network.serializable.packet
 
     logger.info('正在启动窗体')
     app = QApplication(sys.argv)

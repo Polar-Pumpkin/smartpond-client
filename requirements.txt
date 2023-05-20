@@ -4,3 +4,5 @@ requests~=2.28.2
 websockets~=11.0.2
 jsonobject~=2.1.0
 py-machineid~=0.3.0
+pymodbus~=3.2.2
+pyserial~=3.5

@@ -4,7 +4,7 @@ from client.abstract.packet import IncomingPacket, OutgoingPacket
 from client.abstract.serialize import serializable
 from client.config.cached import Cached
 from client.network.websocket import Connection, Client
-from client.serializable import Pond
+from client.network.serializable import Pond
 from client.ui.window import MainWindow
 
 
@@ -30,6 +30,6 @@ class PondCreationReceipt(IncomingPacket):
     pondId: StringProperty()
 
     async def execute(self, connection: Connection, client: Client, window: MainWindow):
-        from client.network.packet import RequestNodeList
+        from client.network.serializable.packet import RequestNodeList
         Cached().pond_id = self.pondId
         connection.send(RequestNodeList(Cached().pond_id))

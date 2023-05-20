@@ -1,9 +1,9 @@
 from typing import List
 
 from client.config.secrets import Secrets
-from client.network.packet import NodeCreation, RequestProfile
+from client.network.serializable.packet import NodeCreation, RequestProfile
 from client.network.websocket import Client
-from client.serializable import Node
+from client.network.serializable import Node
 from client.ui.page.template.namespace import AbstractNamespacePage
 from client.ui.widget.node import NodeWidget
 from client.ui.window import MainWindow

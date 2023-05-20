@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 import time
 from asyncio import Task, AbstractEventLoop
@@ -82,7 +81,7 @@ class Connection(Thread):
         timestamp = time.time()
         try:
             self.__client = await connect('wss://api.entityparrot.cc/smartpond/client',
-                                          extra_headers={'Authorization': f'Bearer {self.__token}'})
+                                          extra_headers={'Authorization': f'Bearer {self.token}'})
         except Exception as ex:
             if isinstance(ex, InvalidStatusCode) and ex.status_code == 401:
                 logger.info('登录凭证已失效')
