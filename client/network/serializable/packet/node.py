@@ -21,8 +21,8 @@ class NodeList(IncomingPacket):
     nodes = ListProperty(Node)
 
     async def execute(self, connection: Connection, client: Client, window: MainWindow):
-        from client.ui.page.node import NodePage
-        window.builder.emit([NodePage, window, self.nodes])
+        from client.ui.page.registration import NodeSelectPage
+        window.builder.emit([NodeSelectPage, window, self.nodes])
 
 
 @serializable

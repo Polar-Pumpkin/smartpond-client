@@ -49,4 +49,4 @@ class Profile(IncomingPacket):
             monitors.monitor(sensor)
 
         from client.ui.page.dashboard import DashboardPage
-        window.builder.emit([DashboardPage])
+        window.builder.emit([DashboardPage, window])

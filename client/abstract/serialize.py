@@ -52,19 +52,20 @@ def serialize(packet: Packet) -> str:
     return json.dumps(packet, cls=PacketEncoder)
 
 
-def deserialize(content: str, clazz: type[T] | None = None) -> T | Any | None:
-    def from_dict(values: dict[str, Any]):
-        name = values.pop('==', None)
-        if name is None or name not in registered:
-            return values
-        target = registered[name]
-        if issubclass(target, JsonObject):
-            return target(values)
-        else:
-            return target(**values)
+def deserialize_from_dict(values: dict[str, Any]) -> Any:
+    name = values.pop('==', None)
+    if name is None or name not in registered:
+        return values
+    target = registered[name]
+    if issubclass(target, JsonObject):
+        return target(values)
+    else:
+        return target(**values)
 
+
+def deserialize(content: str, clazz: type[T] | None = None) -> T | Any | None:
     if clazz is None:
-        return json.loads(content, object_hook=from_dict)
+        return json.loads(content, object_hook=deserialize_from_dict)
     elif issubclass(clazz, JsonObject):
         return clazz(json.loads(content))
     else:

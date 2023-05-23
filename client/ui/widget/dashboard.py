@@ -159,3 +159,4 @@ class SensorFieldTrendWidget(QWidget):
     def set_value(self, values: List[float]):
         self.none.hide()
         self.canvas.show()
+        # TODO 绘图

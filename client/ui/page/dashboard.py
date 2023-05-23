@@ -1,13 +1,16 @@
 from PySide6.QtGui import QFont, Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpacerItem, QSizePolicy, QGridLayout, \
-    QPushButton
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpacerItem, QSizePolicy, QPushButton
 
 from client.config.cached import Cached
+from client.network.monitor import Monitors
+from client.ui.widget.dashboard import SensorViewWidget
+from client.ui.window import MainWindow
 
 
 class DashboardPage(QWidget):
-    def __init__(self):
+    def __init__(self, window: MainWindow):
         super().__init__()
+        self.window: MainWindow = window
 
         self.context = QVBoxLayout()
         self.setLayout(self.context)
@@ -75,19 +78,24 @@ class DashboardPage(QWidget):
         # self.grid.setObjectName('grid')
         # self.grid.setContentsMargins(10, 10, 10, 10)
 
-        self.grid =  QVBoxLayout()
+        self.grid = QVBoxLayout()
         self.context.addLayout(self.grid)
         self.grid.setSpacing(10)
         self.grid.setObjectName('grid')
         self.grid.setContentsMargins(10, 10, 10, 10)
 
-        # TODO 添加传感器 Widget
-        profile = Cached().profile
-        if profile is not None:
-            profile.sensors
+        for monitor in Monitors().monitors.values():
+            self.grid.addWidget(SensorViewWidget(monitor))
+        # TODO 立即获取一次数据
 
         self.create = QPushButton('添加新传感器')
-        self.grid.addWidget(self.create, 0, 0, 1, 4)
+        # self.grid.addWidget(self.create, 0, 0, 1, 4)
+        self.grid.addWidget(self.create)
         self.create.setFixedHeight(40)
         self.create.setObjectName('create')
         self.create.setFlat(True)
+        self.create.clicked.connect(self.__to_sensor_creation)
+
+    def __to_sensor_creation(self):
+        from client.ui.page.sensor import SensorCreatePage
+        self.window.builder.emit([SensorCreatePage, self.window])

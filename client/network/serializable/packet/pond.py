@@ -13,8 +13,8 @@ class PondList(IncomingPacket):
     ponds = ListProperty(Pond)
 
     async def execute(self, connection: Connection, client: Client, window: MainWindow):
-        from client.ui.page.pond import PondPage
-        window.builder.emit([PondPage, window, self.ponds])
+        from client.ui.page.registration import PondSelectPage
+        window.builder.emit([PondSelectPage, window, self.ponds])
 
 
 @serializable

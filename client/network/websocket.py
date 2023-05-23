@@ -86,7 +86,7 @@ class Connection(Thread):
             if isinstance(ex, InvalidStatusCode) and ex.status_code == 401:
                 logger.info('登录凭证已失效')
                 if self.window is not None:
-                    from client.ui.page.login import LoginPage
+                    from client.ui.page.auth import LoginPage
                     self.window.context.emit(LoginPage(self.window))
                 return
             logger.critical(f'上线时遇到错误: {ex}', exc_info=ex)

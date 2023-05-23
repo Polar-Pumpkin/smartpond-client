@@ -29,7 +29,7 @@ class MainWindow(QMainWindow):
         secrets = Secrets()
         secrets.load()
         if secrets.token is None:
-            from client.ui.page.login import LoginPage
+            from client.ui.page.auth import LoginPage
             self.setCentralWidget(LoginPage(self))
         else:
             client.launch(secrets.token)
