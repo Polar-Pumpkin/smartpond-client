@@ -11,9 +11,12 @@ logger = logging.getLogger(__name__)
 registered: dict[str, type] = {}
 T = TypeVar('T')
 
+field = '__serial_name__'
+
 
 def serializable(clazz: type[T]) -> type[T]:
-    if hasattr(clazz, '__serial_name__'):
+    defined = hasattr(clazz, field)
+    if defined:
         name = clazz.__serial_name__
     else:
         match clazz:
@@ -31,7 +34,8 @@ def serializable(clazz: type[T]) -> type[T]:
                 raise ValueError(f'无法生成包 {clazz} 的完整名称')
     if name is None:
         raise ValueError('序列化类型名称不可为 None')
-    setattr(clazz, 'type', name)
+    if not defined:
+        setattr(clazz, field, name)
     registered[name] = clazz
     logger.info('注册可序列化对象: ' + name)
     return clazz
@@ -39,12 +43,12 @@ def serializable(clazz: type[T]) -> type[T]:
 
 class PacketEncoder(JSONEncoder):
     def default(self, o: Any) -> Any:
-        if not (isinstance(o, Packet) and hasattr(o, 'type')):
+        if not (isinstance(o, Packet) and hasattr(o, field)):
             if isinstance(o, JsonObject):
                 return o.to_json()
             return JSONEncoder.default(self, o)
         values = o.to_json()
-        values['=='] = getattr(o, 'type')
+        values['=='] = getattr(o, field)
         return values
 
 

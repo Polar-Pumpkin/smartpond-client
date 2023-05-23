@@ -1,4 +1,6 @@
-from jsonobject import StringProperty, ObjectProperty, ListProperty, SetProperty
+import logging
+
+from jsonobject import StringProperty, ObjectProperty, ListProperty, DictProperty
 
 from client.abstract.packet import IncomingPacket, OutgoingPacket
 from client.abstract.serialize import serializable
@@ -7,6 +9,8 @@ from client.config.secrets import Secrets
 from client.network.serializable import Pond, Node, Sensor, SensorStructure
 from client.network.websocket import Connection, Client
 from client.ui.window import MainWindow
+
+logger = logging.getLogger(__name__)
 
 
 @serializable
@@ -38,7 +42,7 @@ class Profile(IncomingPacket):
     pond = ObjectProperty(Pond)
     node = ObjectProperty(Node)
     sensors = ListProperty(Sensor)
-    structures = SetProperty(SensorStructure)
+    structures = DictProperty(SensorStructure)
 
     async def execute(self, connection: Connection, client: Client, window: MainWindow):
         Cached().profile = self
@@ -46,7 +50,10 @@ class Profile(IncomingPacket):
         monitors = Monitors()
         monitors.launch()
         for sensor in self.sensors:
-            monitors.monitor(sensor)
-
+            structure = self.structures.get(sensor.type, None)
+            if structure is None:
+                logger.warning(f'未找到适用于传感器 {sensor.type} 的结构数据')
+                continue
+            monitors.thread.monitor(sensor, structure)
         from client.ui.page.dashboard import DashboardPage
         window.builder.emit([DashboardPage, window])

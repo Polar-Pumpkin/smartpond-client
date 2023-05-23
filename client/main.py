@@ -1,7 +1,7 @@
 import logging.config
 import os
 import sys
-import threading
+from concurrent.futures import TimeoutError
 
 import qdarktheme
 import yaml
@@ -46,10 +46,19 @@ def main():
     code = app.exec_()
     logger.info('窗体已停止')
 
+    from client.network.monitor import Monitors
+    try:
+        Monitors().stop().result(1)
+    except TimeoutError:
+        pass
+
     from client.network.backend import Backend
     from client.network.websocket import Client
     Backend().stop()
-    Client().stop(reason='Exit').result(1)
+    try:
+        Client().stop(reason='Exit').result(1)
+    except TimeoutError:
+        pass
     logger.info('连接已停止')
 
     sys.exit(code)

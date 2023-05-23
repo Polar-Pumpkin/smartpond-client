@@ -31,7 +31,7 @@ class Failure(IncomingPacket):
 
 @serializable
 class Operation(IncomingPacket):
-    __serial_name__ = 'Operation'
+    __serial_name__ = 'cn.edu.bistu.smartpond.packet.Operation'
     operationId = IntegerProperty()
     packet = DictProperty()
 

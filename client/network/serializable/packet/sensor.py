@@ -47,7 +47,9 @@ class SensorCreationReceipt(IncomingPacket):
     structure = ObjectProperty(SensorStructure)
 
     async def execute(self, connection: Connection, client: Client, window: MainWindow):
+        from client.ui.page.dashboard import DashboardPage
         profile = Cached().profile
         profile.sensors.append(self.sensor)
         if self.structure is not None:
             profile.structures.append(self.structure)
+        window.builder.emit([DashboardPage, window])

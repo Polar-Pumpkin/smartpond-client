@@ -1,9 +1,11 @@
+from concurrent.futures import Future
 from typing import List
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 
-from client.network.serializable.packet.sensor import RequestSensorTypeList
+from client.network.monitor import Monitors
+from client.network.serializable.packet.sensor import RequestSensorTypeList, SensorCreation
 from client.network.websocket import Client
 from client.ui.src.impl.centralize import Ui_Centralize
 from client.ui.widget.common import StatusWidget
@@ -41,8 +43,38 @@ class SensorCreatePage(QWidget, Ui_Centralize):
         self.widget.port.addItems(serial_ports())
         Client().connection.send(RequestSensorTypeList())
 
+    def lock(self):
+        self.widget.name.setEnabled(False)
+        self.widget.port.setEnabled(False)
+        self.widget.model.setEnabled(False)
+
+    def unlock(self):
+        self.widget.name.setEnabled(True)
+        self.widget.port.setEnabled(True)
+        self.widget.model.setEnabled(True)
+
     def __confirm(self):
-        pass
+        self.lock()
+        self.status.hide_all()
+        name = self.widget.name.text()
+        if len(name) <= 0:
+            self.unlock()
+            self.status.show_message('请输入传感器名称')
+            return
+        port = self.widget.port.currentText()
+        self.status.show_message('正在连接至传感器', True)
+        Monitors().test(port).add_done_callback(self.__test_callback)
+
+    def __test_callback(self, future: Future[bool]):
+        available = future.result()
+        if not available:
+            self.unlock()
+            return
+        name = self.widget.name.text()
+        port = self.widget.port.currentText()
+        model = self.widget.model.currentText()
+        self.status.show_message('正在连接至服务器', True)
+        Client().connection.send(SensorCreation(name, port, model))
 
     def __cancel(self):
         from client.ui.page.dashboard import DashboardPage
@@ -54,4 +86,4 @@ class SensorCreatePage(QWidget, Ui_Centralize):
 
     def __ready(self):
         self.widget.show()
-        self.status.hide()
+        self.status.hide_all()
