@@ -1,11 +1,11 @@
 import logging
 
-from jsonobject import StringProperty, ObjectProperty, SetProperty
+from jsonobject import StringProperty, ObjectProperty, SetProperty, IntegerProperty
 
 from client.abstract.packet import IncomingPacket, OutgoingPacket
 from client.abstract.serialize import serializable
 from client.config.cached import Cached
-from client.network.serializable import Sensor, SensorStructure
+from client.network.serializable import Sensor, SensorStructure, SensorReport
 from client.network.websocket import Connection, Client
 from client.ui.window import MainWindow
 
@@ -51,5 +51,23 @@ class SensorCreationReceipt(IncomingPacket):
         profile = Cached().profile
         profile.sensors.append(self.sensor)
         if self.structure is not None:
-            profile.structures.append(self.structure)
+            profile.structures[self.structure.type] = self.structure
         window.builder.emit([DashboardPage, window])
+
+
+count = 0
+
+
+def _report_index() -> int:
+    global count
+    count = count + 1
+    return count
+
+
+@serializable
+class Report(OutgoingPacket):
+    index = IntegerProperty()
+    report = ObjectProperty(SensorReport)
+
+    def __init__(self, report: SensorReport):
+        super().__init__(index=_report_index(), report=report)

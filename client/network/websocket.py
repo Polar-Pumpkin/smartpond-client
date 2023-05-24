@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 class Connection(Thread):
     def __init__(self, window: MainWindow | None, token: str, connected: Future[None]):
         super().__init__()
+        self.__localhost: bool = False
         self.__window: MainWindow | None = window
         self.__token: str = token
         self.__connected: Future[None] = connected
@@ -80,14 +81,15 @@ class Connection(Thread):
         logger.info('客户端准备上线')
         timestamp = time.time()
         try:
-            self.__client = await connect('wss://api.entityparrot.cc/smartpond/client',
+            base_url = 'ws://0.0.0.0:8080' if self.__localhost else 'wss://api.entityparrot.cc/smartpond'
+            self.__client = await connect(f'{base_url}/client',
                                           extra_headers={'Authorization': f'Bearer {self.token}'})
         except Exception as ex:
             if isinstance(ex, InvalidStatusCode) and ex.status_code == 401:
                 logger.info('登录凭证已失效')
                 if self.window is not None:
                     from client.ui.page.auth import LoginPage
-                    self.window.context.emit(LoginPage(self.window))
+                    self.window.builder.emit([LoginPage, self.window])
                 return
             logger.critical(f'上线时遇到错误: {ex}', exc_info=ex)
             # TODO show critical window then exit

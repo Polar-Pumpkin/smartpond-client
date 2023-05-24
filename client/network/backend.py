@@ -7,7 +7,6 @@ from requests.auth import AuthBase
 from requests_futures.sessions import FuturesSession
 
 from client.abstract.meta import Singleton
-from client.config.cached import Cached
 from client.config.secrets import Secrets
 
 logger = logging.getLogger(__name__)
@@ -36,7 +35,8 @@ class TokenAuth(AuthBase):
 
 class Backend(metaclass=Singleton):
     def __init__(self):
-        self.__base_url = 'https://api.entityparrot.cc/smartpond/'
+        self.__localhost = False
+        self.__base_url = 'http://localhost:8080/' if self.__localhost else 'https://api.entityparrot.cc/smartpond/'
         self.__session = LiveServerSession(self.__base_url)
         self.__client = FuturesSession(session=self.__session)
 

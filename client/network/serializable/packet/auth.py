@@ -1,4 +1,6 @@
+import asyncio
 import logging
+from concurrent.futures import Future
 
 from jsonobject import StringProperty, ObjectProperty, ListProperty, DictProperty
 
@@ -45,15 +47,26 @@ class Profile(IncomingPacket):
     structures = DictProperty(SensorStructure)
 
     async def execute(self, connection: Connection, client: Client, window: MainWindow):
+        def to_dashboard(task: Future[None] | None):
+            if task is not None:
+                pass
+            from client.ui.page.dashboard import DashboardPage
+            window.builder.emit([DashboardPage, window])
+
         Cached().profile = self
         from client.network.monitor import Monitors
         monitors = Monitors()
+        monitors.window = window
         monitors.launch()
+
+        loop = monitors.thread.loop
+        futures = []
         for sensor in self.sensors:
             structure = self.structures.get(sensor.type, None)
             if structure is None:
                 logger.warning(f'未找到适用于传感器 {sensor.type} 的结构数据')
                 continue
-            monitors.thread.monitor(sensor, structure)
-        from client.ui.page.dashboard import DashboardPage
-        window.builder.emit([DashboardPage, window])
+            future = monitors.thread.monitor(sensor, structure)
+            futures.append(asyncio.wrap_future(future, loop=loop))
+        asyncio.gather(*futures).add_done_callback(to_dashboard)
+        # to_dashboard(None)

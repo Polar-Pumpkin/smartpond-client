@@ -19,6 +19,8 @@ class FailureReason(Enum):
     INVALID_POND_ID = 4
     INVALID_NODE_NAME = 5
     INVALID_NODE_ID = 6
+    INVALID_SENSOR_ID = 7
+    INVALID_SENSOR_NAME = 8
 
 
 @serializable
@@ -27,6 +29,16 @@ class Failure(IncomingPacket):
 
     async def execute(self, connection: Connection, client: Client, window: MainWindow):
         logger.warning(f'收到失败通知: {FailureReason(self.code)}')
+        widget = window.centralWidget()
+        match self.code:
+            case 8:
+                from client.ui.page.sensor import SensorCreatePage
+                if not isinstance(widget, SensorCreatePage):
+                    return
+                widget.unlock()
+                widget.status.emit_message('该传感器名称已被占用')
+            case _:
+                pass
 
 
 @serializable

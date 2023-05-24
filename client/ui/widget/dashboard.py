@@ -1,5 +1,8 @@
-from typing import List
+import copy
+import logging
+from typing import List, Dict, Tuple, Set
 
+from PySide6.QtCore import Signal
 from PySide6.QtGui import QFont, Qt
 from PySide6.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QGridLayout, QLabel, QSizePolicy, QHBoxLayout
 from pyqtgraph import PlotWidget
@@ -7,11 +10,18 @@ from pyqtgraph import PlotWidget
 from client.network.monitor import Monitor
 from client.network.serializable import Sensor, SensorStructure, SensorField
 
+logger = logging.getLogger(__name__)
+
 
 class SensorViewWidget(QWidget):
+    values = Signal(dict)
+
     def __init__(self, monitor: Monitor):
         super().__init__()
-        self.monitor = monitor
+        self.monitor: Monitor = monitor
+        self.indexes: Dict[str, Tuple[SensorFieldViewWidget, SensorFieldTrendWidget]] = {}
+        self.keys: Set[str] | None = None
+        logger.info(f'创建传感器 {self.monitor.sensor.name} 的视图控件')
 
         self.context = QVBoxLayout()
         self.setLayout(self.context)
@@ -35,27 +45,30 @@ class SensorViewWidget(QWidget):
         self.status.setFixedHeight(20)
         self.status.setObjectName('status')
 
-        fields = list(filter(lambda x: x[1], self.sensor.fields.items()))
-        match len(fields):
-            case 0:
-                self.none = QLabel('没有有效指标')
-                self.grid.addWidget(self.none, 1, 0, 1, 6)
-                self.none.setFixedHeight(20)
-                self.none.setObjectName('none')
-                self.none.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                font = QFont()
-                font.setPointSize(20)
-                font.setBold(True)
-                self.none.setFont(font)
-            case 1:
-                key, _ = fields[0]
-                field: SensorField = self.structure.fields[key]
-                self.grid.addWidget(SensorFieldViewWidget(field.name, field.unit), 1, 0, 1, 2)
-                self.grid.addWidget(SensorFieldTrendWidget(), 1, 2, 1, 4)
-            case _:
-                count = 1
-                for key, value in fields:
-                    pass
+        self.values.connect(self.refresh)
+
+        fields = copy.deepcopy(self.sensor.fields)
+        if len(fields) <= 0:
+            fields.update({x: True for x in self.structure.fields.keys()})
+        fields = list(map(lambda x: x[0], filter(lambda x: x[1], fields.items())))
+        logger.info(f'有效指标: ({len(fields)}) {", ".join(fields)}')
+        if len(fields) > 0:
+            for key in fields:
+                field = self.structure.fields[key]
+                view = SensorFieldViewWidget(field.name, field.unit)
+                trend = SensorFieldTrendWidget()
+                self.indexes[key] = (view, trend)
+            self.arrange()
+        else:
+            self.none = QLabel('没有有效指标')
+            self.grid.addWidget(self.none, 1, 0, 1, 6)
+            self.none.setFixedHeight(40)
+            self.none.setObjectName('none')
+            self.none.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            font = QFont()
+            font.setPointSize(20)
+            font.setBold(True)
+            self.none.setFont(font)
 
     @property
     def sensor(self) -> Sensor:
@@ -65,12 +78,49 @@ class SensorViewWidget(QWidget):
     def structure(self) -> SensorStructure:
         return self.monitor.structure
 
+    def refresh(self, values: Dict[str, float]):
+        for key, value in values.items():
+            content = str(round(value, 2))
+            if key not in self.indexes:
+                field = self.structure.fields[key]
+                view = SensorFieldViewWidget(field.name, field.unit)
+                view.set_value(content)
+                trend = SensorFieldTrendWidget()
+                self.indexes[key] = (view, trend)
+            else:
+                view, trend = self.indexes[key]
+                view.set_value(content)
+        for key in list(filter(lambda x: x[0] not in values, self.indexes)):
+            self.indexes.pop(key)
+        self.arrange()
+
+    def arrange(self):
+        keys = set(self.indexes.keys())
+        if self.keys is not None and self.keys == keys:
+            return
+        index = self.grid.count() - 1
+        while index >= 0:
+            self.grid.takeAt(index)
+            index = index - 1
+        x = 1
+        y = 0
+        for key, widgets in self.indexes.items():
+            view, trend = widgets
+            self.grid.addWidget(view, x, y, 1, 1)
+            self.grid.addWidget(trend, x, y + 1, 1, 2)
+            y = y + 3
+            if y > 3:
+                x = x + 1
+                y = 0
+        self.keys = keys
+
 
 class SensorFieldViewWidget(QWidget):
     def __init__(self, name: str, unit: str):
         super().__init__()
         self.name = name
         self.unit = unit
+        # self.setStyleSheet('background-color: gray;')
 
         self.setFixedHeight(120)
 
@@ -112,6 +162,7 @@ class SensorFieldViewWidget(QWidget):
 class SensorFieldTrendWidget(QWidget):
     def __init__(self):
         super().__init__()
+        # self.setStyleSheet('background-color: gray;')
 
         self.setFixedHeight(120)
 

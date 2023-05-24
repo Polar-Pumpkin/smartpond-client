@@ -13,10 +13,12 @@ from pymodbus.register_read_message import ReadHoldingRegistersResponse
 
 from client.abstract.meta import Singleton
 from client.network.serializable import Sensor, SensorStructure
+from client.network.websocket import Client
+from client.ui.window import MainWindow
 
 logger = logging.getLogger(__name__)
 commands = {
-    'TNET100': (100, 22, 33)
+    'TNET_100': (100, 22, 33)
 }
 
 
@@ -28,15 +30,26 @@ class Monitor:
         self.client: AsyncModbusSerialClient = AsyncModbusSerialClient(port=self.sensor.port,
                                                                        baudrate=9600, bytesize=8,
                                                                        parity='N', stopbits=1)
+        self.payload: List[float] | None = None
         self.timestamp: datetime | None = None
 
     @property
-    def is_online(self):
+    def is_online(self) -> bool:
         return self.client.connected
+
+    @property
+    def last_values(self) -> Dict[str, float] | None:
+        datas = self.payload
+        if datas is None:
+            return None
+        return self.match(datas)
 
     @property
     def last_update(self) -> datetime | None:
         return self.timestamp
+
+    def match(self, values: List[float]) -> Dict[str, float]:
+        return dict(filter(lambda x: x[1] != 0.0, zip(self.structure.fields.keys(), values)))
 
     async def connect(self):
         await self.client.connect()
@@ -45,24 +58,52 @@ class Monitor:
         await self.client.close()
 
     async def pull(self) -> List[float] | None:
-        response = self.client.read_holding_registers(*self.command)
+        timestamp = time.time()
+        # noinspection PyUnresolvedReferences
+        response = await self.client.read_holding_registers(*self.command)
         if not isinstance(response, ReadHoldingRegistersResponse):
             logger.warning(f'与设备通信时收到的响应无效: ({type(response).__name__}) {response}')
             return None
         payload = response.encode()
 
-        results = []
+        values = []
         for index in range(1, payload[0], 4):
             upper = payload[index:index + 2]
             lower = payload[index + 2:index + 4]
-            results.append(struct.unpack('>f', lower + upper)[0])
+            values.append(struct.unpack('>f', lower + upper)[0])
+        self.payload = values
         self.timestamp = datetime.now()
-        return results
+        elapsed = int((time.time() - timestamp) * 1000)
+        logger.info(f'获取设备 {self.sensor.name} 报告({elapsed}ms)')
+        return values
+
+    async def lazy_pull(self):
+        if self.payload is None or self.timestamp is None:
+            return await self.pull()
+        delta = datetime.now() - self.timestamp
+        if delta.total_seconds() >= 60:
+            return await self.pull()
+        return self.payload
+
+    async def report(self):
+        datas: List[float] | None = await self.lazy_pull()
+        if datas is None:
+            return
+        fields: Dict[str, float] = self.match(datas)
+        logger.info(fields)
+        self.sensor.fields.clear()
+        self.sensor.fields.update({x: True for x in fields.keys()})
+        from client.network.serializable import SensorReport
+        report = SensorReport(node_id=self.sensor.nodeId, sensor_id=self.sensor.id, model=self.sensor.type,
+                              fields=fields, timestamp=datetime.now())
+        from client.network.serializable.packet import Report
+        Client().connection.send(Report(report))
 
 
 class MonitorThread(Thread):
-    def __init__(self):
+    def __init__(self, window: MainWindow):
         super().__init__()
+        self.window: MainWindow = window
         self.monitors: Dict[str, Monitor] = {}
         self.__loop: AbstractEventLoop = asyncio.new_event_loop()
         self.__stop_sign: Event = Event()
@@ -91,6 +132,7 @@ class MonitorThread(Thread):
         logger.info('线程准备结束')
 
     async def __corotine(self):
+        from client.ui.page.dashboard import DashboardPage
         logger.info('协程已启动')
         count = 0
         while not self.stop_sign.is_set():
@@ -99,13 +141,21 @@ class MonitorThread(Thread):
             if count < 10:
                 continue
             count = 0
+
+            page: DashboardPage | None = None
+            widget = self.window.centralWidget()
+            if isinstance(widget, DashboardPage):
+                page = widget
             for key, monitor in self.monitors.items():
                 timestamp = time.time()
-                results = await monitor.pull()
-                elapsed = time.time() - timestamp
-                logger.info(f'获取设备 {key} 报告({int(elapsed * 1000)}ms)')
-                # TODO show results
-            # TODO send reports
+                await monitor.report()
+                elapsed = int((time.time() - timestamp) * 1000)
+                logger.info(f'处理设备 {key} 报告({elapsed}ms)')
+                if page is not None:
+                    widget = page.indexes.get(key, None)
+                    if widget is not None:
+                        widget.values.emit(monitor.last_values)
+
         logger.info('协程准备结束')
         for key, monitor in self.monitors.items():
             await monitor.close()
@@ -130,29 +180,10 @@ class MonitorThread(Thread):
         self.monitors[sensor.name] = monitor
         logger.info(f'开始监控设备 {sensor.name}')
 
-    def test(self, port: str) -> Future[bool]:
-        if not self.is_alive():
-            logger.info('线程已经结束, 无法测试连接可用性')
-            future = Future()
-            future.set_result(False)
-            return future
-        return asyncio.run_coroutine_threadsafe(self.__test(port), self.loop)
-
-    @staticmethod
-    async def __test(port: str) -> bool:
-        client = AsyncModbusSerialClient(port=port, baudrate=9600, bytesize=8, parity='N', stopbits=1)
-        try:
-            await client.connect()
-            await asyncio.sleep(1)
-            await client.close()
-        except:
-            logger.error(f'测试与 {port} 通信时遇到错误')
-            return False
-        return True
-
 
 class Monitors(metaclass=Singleton):
     def __init__(self):
+        self.window: MainWindow | None = None
         self.thread: MonitorThread | None = None
 
     @property
@@ -169,17 +200,13 @@ class Monitors(metaclass=Singleton):
                 return
             logger.info('正在取消先前线程')
             self.thread.end()
-        self.thread = MonitorThread()
+        self.thread = MonitorThread(self.window)
         self.thread.start()
 
     def stop(self) -> Future[None]:
+        if self.thread is None:
+            future = Future()
+            future.set_result(None)
+            return future
         self.thread.stop_sign.set()
         return self.thread.stopped
-
-    def test(self, port: str) -> Future[bool]:
-        if self.thread is None:
-            logger.info('未启动线程, 无法测试连接可用性')
-            future = Future()
-            future.set_result(False)
-            return future
-        return self.thread.test(port)

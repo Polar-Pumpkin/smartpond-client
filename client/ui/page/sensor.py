@@ -1,10 +1,8 @@
-from concurrent.futures import Future
 from typing import List
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 
-from client.network.monitor import Monitors
 from client.network.serializable.packet.sensor import RequestSensorTypeList, SensorCreation
 from client.network.websocket import Client
 from client.ui.src.impl.centralize import Ui_Centralize
@@ -62,17 +60,9 @@ class SensorCreatePage(QWidget, Ui_Centralize):
             self.status.show_message('请输入传感器名称')
             return
         port = self.widget.port.currentText()
-        self.status.show_message('正在连接至传感器', True)
-        Monitors().test(port).add_done_callback(self.__test_callback)
-
-    def __test_callback(self, future: Future[bool]):
-        available = future.result()
-        if not available:
-            self.unlock()
-            return
-        name = self.widget.name.text()
-        port = self.widget.port.currentText()
         model = self.widget.model.currentText()
+        # self.status.show_message('正在连接至传感器', True)
+        # Monitors().test(port, model).add_done_callback(self.__test_callback)
         self.status.show_message('正在连接至服务器', True)
         Client().connection.send(SensorCreation(name, port, model))
 

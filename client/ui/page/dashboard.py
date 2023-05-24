@@ -1,3 +1,5 @@
+from typing import Dict
+
 from PySide6.QtGui import QFont, Qt
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpacerItem, QSizePolicy, QPushButton
 
@@ -11,6 +13,7 @@ class DashboardPage(QWidget):
     def __init__(self, window: MainWindow):
         super().__init__()
         self.window: MainWindow = window
+        self.indexes: Dict[str, SensorViewWidget] = {}
 
         self.context = QVBoxLayout()
         self.setLayout(self.context)
@@ -85,8 +88,9 @@ class DashboardPage(QWidget):
         self.grid.setContentsMargins(10, 10, 10, 10)
 
         for monitor in Monitors().monitors.values():
-            self.grid.addWidget(SensorViewWidget(monitor))
-        # TODO 立即获取一次数据
+            widget = SensorViewWidget(monitor)
+            self.indexes[monitor.sensor.name] = widget
+            self.grid.addWidget(widget)
 
         self.create = QPushButton('添加新传感器')
         # self.grid.addWidget(self.create, 0, 0, 1, 4)
