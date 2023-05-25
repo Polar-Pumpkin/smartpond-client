@@ -1,12 +1,13 @@
 import copy
 import logging
 from concurrent.futures import Future
+from datetime import datetime, timedelta
 from typing import List, Dict, Tuple, Set
 
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QFont, Qt
 from PySide6.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QGridLayout, QLabel, QSizePolicy, QHBoxLayout, \
-    QPushButton
+    QPushButton, QSpacerItem
 from pyqtgraph import PlotWidget
 
 from client.network.monitor import Monitor, Monitors
@@ -16,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class SensorViewWidget(QWidget):
-    values = Signal(dict)
+    values = Signal()
+    trends = Signal()
 
     def __init__(self, monitor: Monitor):
         super().__init__()
@@ -36,25 +38,36 @@ class SensorViewWidget(QWidget):
         self.group.setObjectName('group')
         self.group.setContentsMargins(0, 0, 0, 0)
 
-        self.grid = QGridLayout()
-        self.group.setLayout(self.grid)
-        self.grid.setSpacing(10)
-        self.grid.setObjectName('grid')
-        self.grid.setContentsMargins(10, 10, 10, 10)
+        self.vertical = QVBoxLayout()
+        self.group.setLayout(self.vertical)
+        self.vertical.setSpacing(10)
+        self.vertical.setObjectName('vertical')
+        self.vertical.setContentsMargins(10, 10, 10, 10)
+
+        self.horizen = QHBoxLayout()
+        self.vertical.addLayout(self.horizen)
+        self.horizen.setSpacing(10)
+        self.horizen.setObjectName('horizen')
+        self.horizen.setContentsMargins(0, 0, 0, 0)
 
         self.status = QLabel('在线' if self.monitor.is_online else '离线')
-        self.grid.addWidget(self.status, 0, 0, 1, 5)
+        self.horizen.addWidget(self.status)
         self.status.setFixedHeight(40)
         self.status.setObjectName('status')
+        self.status.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
+
+        self.space = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizen.addItem(self.space)
 
         self.button = QPushButton('刷新')
-        self.grid.addWidget(self.button, 0, 5, 1, 1)
+        self.horizen.addWidget(self.button)
         self.button.setFixedHeight(40)
         self.button.setObjectName('pull')
         self.button.setFlat(True)
+        self.button.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
 
         self.label = QLabel()
-        self.grid.addWidget(self.label, 1, 0, 1, 6)
+        self.vertical.addWidget(self.label)
         self.label.setFixedHeight(40)
         self.label.setObjectName('none')
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -64,8 +77,15 @@ class SensorViewWidget(QWidget):
         self.label.setFont(font)
         self.label.hide()
 
+        self.grid = QGridLayout()
+        self.vertical.addLayout(self.grid)
+        self.grid.setSpacing(5)
+        self.grid.setObjectName('grid')
+        self.grid.setContentsMargins(0, 0, 0, 0)
+
         self.button.clicked.connect(self.pull)
         self.values.connect(self.refresh)
+        self.trends.connect(self.redraw)
 
         if not self.monitor.is_online:
             self.message('无法连接至传感器')
@@ -107,7 +127,8 @@ class SensorViewWidget(QWidget):
             return
         self.values.emit(self.monitor.match(result))
 
-    def refresh(self, values: Dict[str, float]):
+    def refresh(self):
+        values = self.monitor.last_values
         for key, value in values.items():
             content = str(round(value, 2))
             if key not in self.indexes:
@@ -119,19 +140,31 @@ class SensorViewWidget(QWidget):
             else:
                 view, trend = self.indexes[key]
                 view.set_value(content)
-        for key in list(filter(lambda x: x[0] not in values, self.indexes)):
-            self.indexes.pop(key)
+        hidden = list(filter(lambda x: x not in values, self.indexes.keys()))
+        for key in hidden:
+            view, trend = self.indexes.pop(key)
+            view.deleteLater()
+            trend.deleteLater()
         self.arrange()
+
+    def redraw(self):
+        history = self.monitor.history
+        for key, values in history.items():
+            if key not in self.indexes:
+                continue
+            _, trend = self.indexes[key]
+            trend.set_value(values)
 
     def arrange(self):
         keys = set(self.indexes.keys())
         if self.keys is not None and self.keys == keys:
             return
+        logger.info('重新排列传感器视图')
         index = self.grid.count() - 1
-        while index > 1:
+        while index >= 0:
             self.grid.takeAt(index)
             index = index - 1
-        x = 1
+        x = 0
         y = 0
         for key, widgets in self.indexes.items():
             view, trend = widgets
@@ -149,9 +182,10 @@ class SensorFieldViewWidget(QWidget):
         super().__init__()
         self.name = name
         self.unit = unit
-        # self.setStyleSheet('background-color: gray;')
+        self.setObjectName('field_view')
+        # self.setStyleSheet('border: 1px solid gray;')
 
-        self.setFixedHeight(120)
+        self.setFixedHeight(200)
 
         self.context = QVBoxLayout()
         self.setLayout(self.context)
@@ -181,7 +215,7 @@ class SensorFieldViewWidget(QWidget):
 
         self.footer = QLabel(self.unit)
         self.view.addWidget(self.footer)
-        self.label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
+        self.footer.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
         self.footer.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom)
 
     def set_value(self, value: str):
@@ -191,9 +225,10 @@ class SensorFieldViewWidget(QWidget):
 class SensorFieldTrendWidget(QWidget):
     def __init__(self):
         super().__init__()
-        # self.setStyleSheet('background-color: gray;')
+        self.setObjectName('field_trend')
+        # self.setStyleSheet('border: 1px solid gray;')
 
-        self.setFixedHeight(120)
+        self.setFixedHeight(200)
 
         self.context = QVBoxLayout()
         self.setLayout(self.context)
@@ -212,12 +247,14 @@ class SensorFieldTrendWidget(QWidget):
         self.label.setObjectName('label')
         self.label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
         self.label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        self.label.hide()
 
         self.interval = QLabel('一小时内')
         self.header.addWidget(self.interval)
         self.interval.setObjectName('interval')
         self.interval.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
         self.interval.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
+        self.interval.hide()
 
         self.none = QLabel('暂无数据')
         self.context.addWidget(self.none)
@@ -236,7 +273,30 @@ class SensorFieldTrendWidget(QWidget):
         self.none.show()
         self.canvas.hide()
 
-    def set_value(self, values: List[float]):
+    def set_value(self, values: Dict[datetime, float]):
         self.none.hide()
         self.canvas.show()
-        # TODO 绘图
+        expanded: Dict[str, float] = {}
+        start = datetime.now()
+        end = start - timedelta(hours=1)
+        cursor = start
+        while cursor > end:
+            key = cursor.strftime('%H:%M')
+            found: datetime | None = None
+            for timestamp, value in values.items():
+                if timestamp.hour == cursor.hour and timestamp.minute == cursor.minute:
+                    expanded[key] = value
+                    found = timestamp
+            if found is None:
+                expanded[key] = 0.0
+            else:
+                values.pop(found)
+            cursor -= timedelta(minutes=1)
+
+        self.canvas.clear()
+        # x = list(expanded.keys())
+        x = range(60)
+        y = list(expanded.values())
+        self.canvas.plot(x, y)
+
+

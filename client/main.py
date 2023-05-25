@@ -4,6 +4,7 @@ import sys
 from concurrent.futures import TimeoutError
 
 import qdarktheme
+import pyqtgraph
 import yaml
 from PySide6.QtWidgets import QApplication
 
@@ -33,6 +34,10 @@ def main():
     app = QApplication(sys.argv)
     # apply_stylesheet(app, theme='dark_blue.xml')
     qdarktheme.setup_theme('auto')
+
+    pyqtgraph.setConfigOptions(leftButtonPan=False, antialias=True)
+    pyqtgraph.setConfigOption('background', (248, 249, 250))
+    pyqtgraph.setConfigOption('foreground', 'k')
 
     from client.ui.window import MainWindow
     window = MainWindow()

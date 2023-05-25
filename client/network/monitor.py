@@ -1,4 +1,5 @@
 import asyncio
+import copy
 import logging
 import struct
 import time
@@ -32,6 +33,7 @@ class Monitor:
                                                                        parity='N', stopbits=1)
         self.payload: List[float] | None = None
         self.timestamp: datetime | None = None
+        self.history: Dict[str, Dict[datetime, float]] = {}
 
     @property
     def is_online(self) -> bool:
@@ -50,6 +52,24 @@ class Monitor:
 
     def match(self, values: List[float]) -> Dict[str, float]:
         return dict(filter(lambda x: x[1] != 0.0, zip(self.structure.fields.keys(), values)))
+
+    def record(self):
+        timestamp = copy.deepcopy(self.last_update)
+        timestamp.replace(second=0, microsecond=0)
+        values = self.last_values
+        for key, value in values.items():
+            records = self.history.get(key, {})
+            delta = None
+            if len(records) > 0:
+                delta = timestamp - max(records.keys())
+            if delta is not None and delta.total_seconds() < 60:
+                continue
+            records[timestamp] = value
+            if len(records) > 60:
+                records = {x[0]: x[1] for x in records.items() if (timestamp - x[0]).total_seconds() < 3600}
+            self.history[key] = records
+        for key in list(filter(lambda x: x not in values, self.history.keys())):
+            self.history.pop(key)
 
     async def connect(self):
         await self.client.connect()
@@ -77,6 +97,7 @@ class Monitor:
             values.append(struct.unpack('>f', lower + upper)[0])
         self.payload = values
         self.timestamp = datetime.now()
+        self.record()
         elapsed = int((time.time() - timestamp) * 1000)
         logger.info(f'获取设备 {self.sensor.name} 报告({elapsed}ms)')
         return values
@@ -158,7 +179,8 @@ class MonitorThread(Thread):
                 if page is not None:
                     widget = page.indexes.get(key, None)
                     if widget is not None:
-                        widget.values.emit(monitor.last_values)
+                        widget.values.emit()
+                        widget.trends.emit()
 
         logger.info('协程准备结束')
         for key, monitor in self.monitors.items():
