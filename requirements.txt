@@ -1,6 +1,6 @@
 pyyaml~=6.0
-pyside6~=6.5.0
-requests~=2.28.2
+pyqt5~=5.15.9
+requests~=2.30.0
 websockets~=11.0.2
 jsonobject~=2.1.0
 py-machineid~=0.3.0
