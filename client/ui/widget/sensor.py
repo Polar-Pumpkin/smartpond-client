@@ -3,7 +3,7 @@ from typing import Dict
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
-from pyqtgraph import PlotWidget, AxisItem
+from pyqtgraph import PlotWidget, AxisItem, mkPen
 
 from client.ui.src.impl.sensor_create import Ui_SensorCreate
 from client.ui.src.impl.sensor_field import Ui_SensorField
@@ -66,8 +66,18 @@ class SensorFieldWidget(QWidget, Ui_SensorField):
             cursor -= timedelta(minutes=1)
 
         self.canvas.clear()
-        x = dict(enumerate(expanded.keys()))
+        x = {}
         y = list(expanded.values())
-        xAxis = AxisItem(orientation='bottom')
+        keys = list(expanded.keys())
+        for index in range(len(keys)):
+            num = index + 1
+            if num == 1 or num % 10 == 0:
+                x[index] = keys[index]
+            else:
+                x[index] = ''
+        # x = dict(enumerate(expanded.keys()))
+        xAxis = self.canvas.getAxis('bottom')
+        # xAxis = AxisItem(orientation='bottom')
         xAxis.setTicks([x.items()])
-        self.canvas.plot(list(x.keys()), y, axisItems={'bottom': xAxis})
+        pen = mkPen(color=(77, 81, 87), width=2)
+        self.canvas.plot(list(x.keys()), y, pen=pen, axisItems={'bottom': xAxis})

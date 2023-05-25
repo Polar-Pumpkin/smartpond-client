@@ -35,9 +35,9 @@ def main():
     # apply_stylesheet(app, theme='dark_blue.xml')
     qdarktheme.setup_theme('auto')
 
-    pyqtgraph.setConfigOptions(leftButtonPan=False, antialias=True)
+    pyqtgraph.setConfigOptions(leftButtonPan=True, antialias=True)
     pyqtgraph.setConfigOption('background', (248, 249, 250))
-    pyqtgraph.setConfigOption('foreground', 'k')
+    pyqtgraph.setConfigOption('foreground', (77, 81, 87))
 
     from client.ui.window import MainWindow
     window = MainWindow()

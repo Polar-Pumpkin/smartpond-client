@@ -23,13 +23,12 @@ class Ui_SensorField(object):
         if not SensorField.objectName():
             SensorField.setObjectName(u"SensorField")
         SensorField.resize(400, 200)
-        SensorField.setStyleSheet(u"background-color: #e6ebee;")
         self.horizontalLayout = QHBoxLayout(SensorField)
         self.horizontalLayout.setSpacing(10)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.view = QVBoxLayout()
-        self.view.setSpacing(10)
+        self.view.setSpacing(0)
         self.view.setObjectName(u"view")
         self.name = QLabel(SensorField)
         self.name.setObjectName(u"name")
@@ -38,6 +37,7 @@ class Ui_SensorField(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.name.sizePolicy().hasHeightForWidth())
         self.name.setSizePolicy(sizePolicy)
+        self.name.setMinimumSize(QSize(100, 0))
         font = QFont()
         font.setPointSize(20)
         self.name.setFont(font)
@@ -46,6 +46,7 @@ class Ui_SensorField(object):
 
         self.value = QLabel(SensorField)
         self.value.setObjectName(u"value")
+        self.value.setMinimumSize(QSize(100, 0))
         font1 = QFont()
         font1.setPointSize(32)
         font1.setBold(True)
@@ -58,6 +59,7 @@ class Ui_SensorField(object):
         self.unit.setObjectName(u"unit")
         sizePolicy.setHeightForWidth(self.unit.sizePolicy().hasHeightForWidth())
         self.unit.setSizePolicy(sizePolicy)
+        self.unit.setMinimumSize(QSize(100, 0))
 
         self.view.addWidget(self.unit)
 
