@@ -18,7 +18,7 @@ from client.ui.window import MainWindow
 
 logger = logging.getLogger(__name__)
 commands = {
-    'TNET_100': (100, 22, 33)
+    'TNET_100': (100, 24, 33)
 }
 
 

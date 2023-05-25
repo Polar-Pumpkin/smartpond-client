@@ -9,3 +9,4 @@
 
 !client/**
 client/test
+client/**/__pycache__
