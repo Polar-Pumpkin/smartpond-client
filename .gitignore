@@ -5,7 +5,7 @@
 !.gitignore
 !requirements.txt
 !logging.yml
-!client.py
+!launch.py
 
 !client/**
 client/test
