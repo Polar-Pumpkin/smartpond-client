@@ -8,5 +8,5 @@ pymodbus~=3.2.2
 pyserial~=3.5
 pyqtgraph~=0.13.3
 gitpython~=3.1.31
-pyqtdarktheme~=2.1.0)
+pyqtdarktheme~=2.1.0
 requests_futures~=1.0.0
