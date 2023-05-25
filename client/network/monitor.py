@@ -179,8 +179,7 @@ class MonitorThread(Thread):
                 if page is not None:
                     widget = page.indexes.get(key, None)
                     if widget is not None:
-                        widget.values.emit()
-                        widget.trends.emit()
+                        widget.fetch.emit()
 
         logger.info('协程准备结束')
         for key, monitor in self.monitors.items():
