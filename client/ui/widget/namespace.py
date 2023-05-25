@@ -1,8 +1,8 @@
 import logging
 from typing import Optional, Sequence, Callable
 
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QWidget
+from PyQt5.QtCore import pyqtSignal as Signal
+from PyQt5.QtWidgets import QWidget
 
 from client.ui.src.impl.namespace_create import Ui_NamespaceCreate
 from client.ui.src.impl.namespace_select import Ui_NamespaceSelect

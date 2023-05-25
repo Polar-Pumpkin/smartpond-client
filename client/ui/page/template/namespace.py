@@ -3,8 +3,8 @@ from abc import abstractmethod
 from asyncio import Future
 from typing import Dict, Any
 
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QWidget
+from PyQt5.QtCore import pyqtSignal as Signal
+from PyQt5.QtWidgets import QWidget
 from requests import Response
 
 from client.abstract.meta import QABCMeta

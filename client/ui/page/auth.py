@@ -1,8 +1,8 @@
 from asyncio import Future
 from typing import Optional
 
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QWidget
+from PyQt5.QtCore import pyqtSignal as Signal
+from PyQt5.QtWidgets import QWidget
 from requests import Response
 
 from client.network.backend import Backend

@@ -1,8 +1,8 @@
 import logging
 from typing import Optional
 
-from PySide6.QtCore import Signal, Qt
-from PySide6.QtWidgets import QWidget
+from PyQt5.QtCore import pyqtSignal as Signal, Qt
+from PyQt5.QtWidgets import QWidget
 
 from client.ui.src.impl.status import Ui_Status
 

@@ -1,6 +1,6 @@
 from typing import Optional, Tuple
 
-from PySide6.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget
 
 from client.ui.src.impl.login import Ui_Login
 from client.ui.src.impl.node import Ui_Node

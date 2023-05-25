@@ -1,7 +1,7 @@
 from typing import List
 
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QWidget
+from PyQt5.QtCore import pyqtSignal as Signal
+from PyQt5.QtWidgets import QWidget
 
 from client.network.serializable.packet.sensor import RequestSensorTypeList, SensorCreation
 from client.network.websocket import Client

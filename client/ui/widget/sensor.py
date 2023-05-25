@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Dict
 
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QWidget
+from PyQt5.QtCore import pyqtSignal as Signal
+from PyQt5.QtWidgets import QWidget
 from pyqtgraph import PlotWidget, AxisItem, mkPen
 
 from client.ui.src.impl.sensor_create import Ui_SensorCreate

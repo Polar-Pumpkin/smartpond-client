@@ -1,6 +1,6 @@
 from abc import ABCMeta
 
-from PySide6.QtCore import QObject
+from PyQt5.QtCore import QObject
 from jsonobject import JsonObject
 
 

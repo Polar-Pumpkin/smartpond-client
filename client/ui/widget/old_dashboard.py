@@ -4,9 +4,9 @@ from concurrent.futures import Future
 from datetime import datetime, timedelta
 from typing import List, Dict, Tuple, Set
 
-from PySide6.QtCore import Signal
-from PySide6.QtGui import QFont, Qt
-from PySide6.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QGridLayout, QLabel, QSizePolicy, QHBoxLayout, \
+from PyQt5.QtCore import pyqtSignal as Signal, Qt
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QGridLayout, QLabel, QSizePolicy, QHBoxLayout, \
     QPushButton, QSpacerItem
 from pyqtgraph import PlotWidget
 

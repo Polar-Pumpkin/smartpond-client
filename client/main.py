@@ -6,7 +6,7 @@ from concurrent.futures import TimeoutError
 import qdarktheme
 import pyqtgraph
 import yaml
-from PySide6.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication
 
 from client.util import handle_exception
 

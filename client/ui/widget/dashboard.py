@@ -2,9 +2,9 @@ import copy
 import logging
 from typing import Dict
 
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QGroupBox, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy, QSpacerItem, QPushButton, \
+from PyQt5.QtCore import pyqtSignal as Signal, Qt
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QGroupBox, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy, QSpacerItem, QPushButton, \
     QGridLayout
 
 from client.network.monitor import Monitor

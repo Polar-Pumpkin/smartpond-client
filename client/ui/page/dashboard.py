@@ -1,7 +1,8 @@
 from typing import Dict
 
-from PySide6.QtGui import QFont, Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpacerItem, QSizePolicy, QPushButton
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpacerItem, QSizePolicy, QPushButton
 
 from client.config.cached import Cached
 from client.network.monitor import Monitors

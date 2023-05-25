@@ -1,7 +1,7 @@
 import logging
 
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QMainWindow, QWidget
+from PyQt5.QtCore import pyqtSignal as Signal
+from PyQt5.QtWidgets import QMainWindow, QWidget
 
 from client.config.secrets import Secrets
 
