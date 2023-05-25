@@ -25,12 +25,6 @@ def main():
     sys.excepthook = handle_exception
     # threading.excepthook = handle_exception
 
-    # log.info('检查依赖库可用性')
-    # try:
-    #     subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
-    # except CalledProcessError as ex:
-    #     log.exception('依赖库检查失败', exc_info=ex)
-
     # 加载所有 Websocket 数据包
     # noinspection PyUnresolvedReferences
     import client.network.serializable.packet
