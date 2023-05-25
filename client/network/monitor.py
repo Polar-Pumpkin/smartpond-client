@@ -58,6 +58,10 @@ class Monitor:
         await self.client.close()
 
     async def pull(self) -> List[float] | None:
+        if not self.is_online:
+            await self.connect()
+        if not self.is_online:
+            return None
         timestamp = time.time()
         # noinspection PyUnresolvedReferences
         response = await self.client.read_holding_registers(*self.command)
@@ -179,6 +183,14 @@ class MonitorThread(Thread):
             logger.error(f'连接至设备 {sensor.name} 时遇到问题: {ex}', exc_info=ex)
         self.monitors[sensor.name] = monitor
         logger.info(f'开始监控设备 {sensor.name}')
+
+    def pull(self, monitor: Monitor) -> Future[List[float] | None]:
+        if not self.is_alive():
+            logger.info('线程已经结束, 无法获取报告')
+            future = Future()
+            future.set_result(None)
+            return future
+        return asyncio.run_coroutine_threadsafe(monitor.pull(), self.loop)
 
 
 class Monitors(metaclass=Singleton):

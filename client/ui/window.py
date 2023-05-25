@@ -32,8 +32,11 @@ class MainWindow(QMainWindow):
             from client.ui.page.auth import LoginPage
             self.setCentralWidget(LoginPage(self))
         else:
+            from client.ui.widget.common import StatusWidget
+            status = StatusWidget()
+            self.setCentralWidget(status)
+            status.show_message('正在连接至服务器', True)
             client.launch(secrets.token)
-            # TODO maybe loading page
 
     def build(self, args: list):
         clazz = args.pop(0)

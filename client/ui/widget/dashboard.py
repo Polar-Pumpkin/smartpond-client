@@ -1,14 +1,16 @@
 import copy
 import logging
+from concurrent.futures import Future
 from typing import List, Dict, Tuple, Set
 
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QFont, Qt
-from PySide6.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QGridLayout, QLabel, QSizePolicy, QHBoxLayout
+from PySide6.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QGridLayout, QLabel, QSizePolicy, QHBoxLayout, \
+    QPushButton
 from pyqtgraph import PlotWidget
 
-from client.network.monitor import Monitor
-from client.network.serializable import Sensor, SensorStructure, SensorField
+from client.network.monitor import Monitor, Monitors
+from client.network.serializable import Sensor, SensorStructure
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +43,33 @@ class SensorViewWidget(QWidget):
         self.grid.setContentsMargins(10, 10, 10, 10)
 
         self.status = QLabel('在线' if self.monitor.is_online else '离线')
-        self.grid.addWidget(self.status, 0, 0, 1, 6)
-        self.status.setFixedHeight(20)
+        self.grid.addWidget(self.status, 0, 0, 1, 5)
+        self.status.setFixedHeight(40)
         self.status.setObjectName('status')
 
+        self.button = QPushButton('刷新')
+        self.grid.addWidget(self.button, 0, 5, 1, 1)
+        self.button.setFixedHeight(40)
+        self.button.setObjectName('pull')
+        self.button.setFlat(True)
+
+        self.label = QLabel()
+        self.grid.addWidget(self.label, 1, 0, 1, 6)
+        self.label.setFixedHeight(40)
+        self.label.setObjectName('none')
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        font = QFont()
+        font.setPointSize(20)
+        font.setBold(True)
+        self.label.setFont(font)
+        self.label.hide()
+
+        self.button.clicked.connect(self.pull)
         self.values.connect(self.refresh)
+
+        if not self.monitor.is_online:
+            self.message('无法连接至传感器')
+            return
 
         fields = copy.deepcopy(self.sensor.fields)
         if len(fields) <= 0:
@@ -60,15 +84,7 @@ class SensorViewWidget(QWidget):
                 self.indexes[key] = (view, trend)
             self.arrange()
         else:
-            self.none = QLabel('没有有效指标')
-            self.grid.addWidget(self.none, 1, 0, 1, 6)
-            self.none.setFixedHeight(40)
-            self.none.setObjectName('none')
-            self.none.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            font = QFont()
-            font.setPointSize(20)
-            font.setBold(True)
-            self.none.setFont(font)
+            self.message('没有有效指标')
 
     @property
     def sensor(self) -> Sensor:
@@ -77,6 +93,19 @@ class SensorViewWidget(QWidget):
     @property
     def structure(self) -> SensorStructure:
         return self.monitor.structure
+
+    def message(self, message: str):
+        self.label.show()
+        self.label.setText(message)
+
+    def pull(self):
+        Monitors().thread.pull(self.monitor).add_done_callback(self.__pull_callback)
+
+    def __pull_callback(self, future: Future[List[float | None]]):
+        result = future.result()
+        if result is None:
+            return
+        self.values.emit(self.monitor.match(result))
 
     def refresh(self, values: Dict[str, float]):
         for key, value in values.items():
@@ -99,7 +128,7 @@ class SensorViewWidget(QWidget):
         if self.keys is not None and self.keys == keys:
             return
         index = self.grid.count() - 1
-        while index >= 0:
+        while index > 1:
             self.grid.takeAt(index)
             index = index - 1
         x = 1

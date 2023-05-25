@@ -81,8 +81,20 @@ class DashboardPage(QWidget):
         # self.grid.setObjectName('grid')
         # self.grid.setContentsMargins(10, 10, 10, 10)
 
+        # self.scroll = QScrollArea()
+        # self.context.addWidget(self.scroll)
+        # self.scroll.setObjectName('scroll')
+        # self.scroll.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        # self.scroll.setStyleSheet('background-color: green;')
+
+        # self.area = QWidget()
+        # self.area.setObjectName('area')
+        # self.area.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        # self.area.setStyleSheet('background-color: black;')
+
         self.grid = QVBoxLayout()
         self.context.addLayout(self.grid)
+        # self.area.setLayout(self.grid)
         self.grid.setSpacing(10)
         self.grid.setObjectName('grid')
         self.grid.setContentsMargins(10, 10, 10, 10)
@@ -99,6 +111,8 @@ class DashboardPage(QWidget):
         self.create.setObjectName('create')
         self.create.setFlat(True)
         self.create.clicked.connect(self.__to_sensor_creation)
+
+        # self.scroll.setWidget(self.area)
 
     def __to_sensor_creation(self):
         from client.ui.page.sensor import SensorCreatePage
