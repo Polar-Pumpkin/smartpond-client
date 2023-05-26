@@ -25,7 +25,7 @@ class DashboardPage(QWidget):
 
         self.header = QWidget()
         self.context.addWidget(self.header)
-        self.header.setFixedHeight(60)
+        # self.header.setFixedHeight(60)
         self.header.setObjectName('header')
         # self.header.setStyleSheet('background-color: #000000;')
 

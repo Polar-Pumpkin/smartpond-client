@@ -100,7 +100,11 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QComboBox" name="port"/>
+       <widget class="QComboBox" name="port">
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item row="4" column="0">
        <widget class="QPushButton" name="confirm">
