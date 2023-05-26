@@ -3,7 +3,7 @@ from typing import Dict
 
 from PyQt5.QtCore import pyqtSignal as Signal
 from PyQt5.QtWidgets import QWidget
-from pyqtgraph import PlotWidget, AxisItem, mkPen
+from pyqtgraph import PlotWidget, mkPen
 
 from client.ui.src.impl.sensor_create import Ui_SensorCreate
 from client.ui.src.impl.sensor_field import Ui_SensorField
@@ -49,10 +49,12 @@ class SensorFieldWidget(QWidget, Ui_SensorField):
         self.status.hide()
         self.canvas.show()
         expanded: Dict[str, float] = {}
-        start = datetime.now()
-        end = start - timedelta(hours=1)
+        # start = datetime.now()
+        end = datetime.now()
+        # end = start - timedelta(hours=1)
+        start = end - timedelta(hours=1)
         cursor = start
-        while cursor > end:
+        while cursor <= end:
             key = cursor.strftime('%H:%M')
             found: datetime | None = None
             for timestamp, value in values.items():
@@ -63,7 +65,7 @@ class SensorFieldWidget(QWidget, Ui_SensorField):
                 expanded[key] = 0.0
             else:
                 values.pop(found)
-            cursor -= timedelta(minutes=1)
+            cursor += timedelta(minutes=1)
 
         self.canvas.clear()
         x = {}

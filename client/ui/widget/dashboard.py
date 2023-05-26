@@ -93,7 +93,7 @@ class SensorViewWidget(QGroupBox):
         if set(widgets.keys()) == set(self.indexes.keys()):
             return
         logger.info('重新排列传感器视图')
-        values = widgets.values()
+        values = list(widgets.values())
         if self.grid is not None:
             for index in range(self.context.count()):
                 item = self.context.itemAt(index)
@@ -101,11 +101,17 @@ class SensorViewWidget(QGroupBox):
                     self.context.removeItem(item)
         self.grid = QGridLayout()
         self.context.addLayout(self.grid)
-        x, y = 0, 0
-        for widget in values:
-            self.grid.addWidget(widget, x, y, 1, 1)
-            y += 1
-            if y > 1:
-                x += 1
-                y = 0
+        dual = False
+        if dual:
+            x, y = 0, 0
+            for widget in values:
+                self.grid.addWidget(widget, x, y, 1, 1)
+                y += 1
+                if y > 1:
+                    x += 1
+                    y = 0
+        else:
+            for index in range(len(values)):
+                widget = values[index]
+                self.grid.addWidget(widget, index, 1, 1, 1)
         self.indexes = widgets

@@ -76,6 +76,10 @@ class DashboardPage(QWidget):
         self.username.setFont(username_font)
         self.username.setAlignment(Qt.AlignmentFlag.AlignRight)
 
+        # ### !!!
+        # self.header.hide()
+        # ### !!!
+
         # self.grid = QGridLayout()
         # self.context.addLayout(self.grid)
         # self.grid.setSpacing(10)
