@@ -17,6 +17,11 @@ def save_settings():
 
 
 def main():
+    path, _ = os.path.split(__file__)
+    if os.getcwd() != path:
+        print('正在更改工作目录')
+        os.chdir(path)
+
     if os.path.exists('.settings.json'):
         with open('.settings.json', 'r') as config:
             settings.update(json.load(config))
