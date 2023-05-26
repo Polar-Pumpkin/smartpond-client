@@ -6,7 +6,7 @@ from concurrent.futures import TimeoutError
 import yaml
 from PyQt5.QtWidgets import QApplication
 import pyqtgraph
-# import qdarktheme
+import qdarktheme
 
 from client.util import handle_exception
 
@@ -33,7 +33,7 @@ def main():
     logger.info('正在启动窗体')
     app = QApplication(sys.argv)
     # apply_stylesheet(app, theme='dark_blue.xml')
-    # qdarktheme.setup_theme('auto')
+    qdarktheme.setup_theme('auto')
 
     pyqtgraph.setConfigOptions(leftButtonPan=True, antialias=True)
     pyqtgraph.setConfigOption('background', (248, 249, 250))
