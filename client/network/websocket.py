@@ -166,7 +166,7 @@ class Client(metaclass=Singleton):
         logger.info('已创建新连接对象')
         if old_connection is not None:
             logger.info('非首次连接, 将在停止先前连接后运行新的连接')
-            self.__connection.stop(reason='Reconnect').add_done_callback(self.__connect)
+            old_connection.stop(reason='Reconnect').add_done_callback(self.__connect)
         else:
             logger.info('运行新的连接')
             self.__connect()

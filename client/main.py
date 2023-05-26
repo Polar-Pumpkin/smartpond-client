@@ -59,7 +59,7 @@ def main():
     except TimeoutError:
         pass
     logger.info('连接已停止')
-
+    logger.info(f'退出码: {code}')
     sys.exit(code)
 
 

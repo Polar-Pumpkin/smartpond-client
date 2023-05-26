@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 
 settings = {
     'inspection': {
@@ -14,6 +15,12 @@ settings = {
 def save_settings():
     with open('.settings.json', 'w') as file:
         json.dump(settings, file)
+
+
+def run():
+    import client.main as client
+
+    client.main()
 
 
 def main():
@@ -50,9 +57,10 @@ def main():
                 os.execl(python, python, *sys.argv)
                 return
 
-    import client.main as client
-
-    client.main()
+    while True:
+        run()
+        print('将在 5 秒后重启...')
+        time.sleep(5)
 
 
 if __name__ == '__main__':
