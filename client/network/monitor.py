@@ -160,7 +160,7 @@ class MonitorThread(Thread):
     async def __corotine(self):
         from client.ui.page.dashboard import DashboardPage
         logger.info('协程已启动')
-        count = 0
+        count = 50
         while not self.stop_sign.is_set():
             await asyncio.sleep(1)
             count = count + 1
