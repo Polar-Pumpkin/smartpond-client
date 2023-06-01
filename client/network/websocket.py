@@ -137,7 +137,7 @@ class Connection(Thread):
         if self.client is None or not self.client.open:
             logger.warning('客户端未在线, 无法发送数据')
             return
-        logger.info(f'--> ({name}) {message}')
+        # logger.info(f'--> ({name}) {message}')
         await self.client.send(message)
 
 
@@ -184,7 +184,7 @@ class Client(metaclass=Singleton):
         if isinstance(packet, OutgoingPacket):
             from client.abstract.serialize import serialize
             name = type(packet).__name__
-            logger.info(f'Preparing {name}: {serialize(packet)}')
+            logger.info(f'--> ({name}) {serialize(packet)}')
         completed = Future()
         if self.__connection is None:
             logger.warning('客户端连接未初始化, 无法发送数据')
