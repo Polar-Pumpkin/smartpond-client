@@ -198,6 +198,10 @@ class MonitorThread(Thread):
         return asyncio.run_coroutine_threadsafe(self.__monitor(sensor, structure), self.loop)
 
     async def __monitor(self, sensor: Sensor, structure: SensorStructure):
+        monitor = self.monitors.get(sensor.name, None)
+        if monitor is not None and monitor.is_online:
+            logger.info(f'复用设备 {sensor.name} 的监控实例')
+            return
         monitor = Monitor(sensor, structure)
         try:
             await monitor.connect()
