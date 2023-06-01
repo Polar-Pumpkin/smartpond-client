@@ -39,7 +39,7 @@ class SensorCreatePage(QWidget, Ui_Centralize):
         self.widget.name.clear()
         self.widget.port.clear()
         self.widget.port.addItems(serial_ports())
-        Client().connection.send(RequestSensorTypeList())
+        Client().send(RequestSensorTypeList())
 
     def lock(self):
         self.widget.name.setEnabled(False)
@@ -64,7 +64,7 @@ class SensorCreatePage(QWidget, Ui_Centralize):
         # self.status.show_message('正在连接至传感器', True)
         # Monitors().test(port, model).add_done_callback(self.__test_callback)
         self.status.show_message('正在连接至服务器', True)
-        Client().connection.send(SensorCreation(name, port, model))
+        Client().send(SensorCreation(name, port, model))
 
     def __cancel(self):
         from client.ui.page.dashboard import DashboardPage

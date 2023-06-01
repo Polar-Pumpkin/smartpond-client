@@ -32,4 +32,4 @@ class PondCreationReceipt(IncomingPacket):
     async def execute(self, connection: Connection, client: Client, window: MainWindow):
         from client.network.serializable.packet import RequestNodeList
         Cached().pond_id = self.pondId
-        connection.send(RequestNodeList(Cached().pond_id))
+        client.send(RequestNodeList(Cached().pond_id))

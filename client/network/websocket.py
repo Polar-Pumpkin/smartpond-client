@@ -179,5 +179,20 @@ class Client(metaclass=Singleton):
             return future
         return self.__connection.stop(code, reason)
 
+    def send(self, packet) -> Future[None]:
+        completed = Future()
+        if self.__connection is None:
+            logger.warning('客户端连接未初始化, 无法发送数据')
+            completed.set_result(None)
+            return completed
+        if not self.__connection.is_alive() or not self.__connection.client.open:
+            logger.warning('线程已经结束或客户端离线, 尝试重新连接到服务器')
+            launched = self.launch(self.__connection.token)
+            launched.add_done_callback(
+                lambda: self.__connection.send(packet).add_done_callback(lambda: completed.set_result(None))
+            )
+            return completed
+        return self.__connection.send(packet)
+
     def __connect(self):
         self.__connection.start()

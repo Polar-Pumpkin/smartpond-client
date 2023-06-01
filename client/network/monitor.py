@@ -79,6 +79,7 @@ class Monitor:
 
     async def pull(self) -> List[float] | None:
         if not self.is_online:
+            logger.info('正在尝试重新连接至传感器')
             await self.connect()
         if not self.is_online:
             return None
@@ -122,7 +123,7 @@ class Monitor:
         report = SensorReport(node_id=self.sensor.nodeId, sensor_id=self.sensor.id, model=self.sensor.type,
                               fields=fields, timestamp=datetime.now())
         from client.network.serializable.packet import Report
-        Client().connection.send(Report(report))
+        Client().send(Report(report))
 
 
 class MonitorThread(Thread):
@@ -163,7 +164,7 @@ class MonitorThread(Thread):
         while not self.stop_sign.is_set():
             await asyncio.sleep(1)
             count = count + 1
-            if count < 10:
+            if count < 60:
                 continue
             count = 0
 

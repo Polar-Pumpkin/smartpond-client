@@ -62,12 +62,12 @@ class PondSelectPage(AbstractNamespacePage):
 
     def _create(self, name: str):
         self.status.show_message(f'正在创建鱼塘', True)
-        Client().connection.send(PondCreation(name))
+        Client().send(PondCreation(name))
 
     def _select(self, name: str):
         self.status.show_message(f'正在与服务器通信', True)
         Cached().pond_id = self.namespaces[name].id
-        Client().connection.send(RequestNodeList(Cached().pond_id))
+        Client().send(RequestNodeList(Cached().pond_id))
 
     def _show_selected(self, name: str) -> str:
         timestamp = self.namespaces[name].created.strftime("%Y-%m-%d %H:%M:%S")
@@ -80,11 +80,11 @@ class NodeSelectPage(AbstractNamespacePage):
 
     def _create(self, name: str):
         self.status.show_message(f'正在创建节点', True)
-        Client().connection.send(NodeCreation(Cached().pond_id, name, Secrets().signature))
+        Client().send(NodeCreation(Cached().pond_id, name, Secrets().signature))
 
     def _select(self, name: str):
         self.status.show_message(f'正在与服务器通信', True)
-        Client().connection.send(RequestProfile(self.namespaces[name].id, Secrets().signature))
+        Client().send(RequestProfile(self.namespaces[name].id, Secrets().signature))
 
     def _show_selected(self, name: str) -> str:
         timestamp = self.namespaces[name].created.strftime("%Y-%m-%d %H:%M:%S")

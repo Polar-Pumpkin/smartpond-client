@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 @serializable
 class RequestNodeRegistration(IncomingPacket):
     async def execute(self, connection: Connection, client: Client, window: MainWindow):
-        connection.send(NodeRegistration(Secrets().signature))
+        client.send(NodeRegistration(Secrets().signature))
 
 
 @serializable
