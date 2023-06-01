@@ -180,6 +180,11 @@ class Client(metaclass=Singleton):
         return self.__connection.stop(code, reason)
 
     def send(self, packet) -> Future[None]:
+        from client.abstract.packet import OutgoingPacket
+        if isinstance(packet, OutgoingPacket):
+            from client.abstract.serialize import serialize
+            name = type(packet).__name__
+            logger.info(f'Preparing {name}: {serialize(packet)}')
         completed = Future()
         if self.__connection is None:
             logger.warning('客户端连接未初始化, 无法发送数据')
@@ -194,5 +199,5 @@ class Client(metaclass=Singleton):
             return completed
         return self.__connection.send(packet)
 
-    def __connect(self):
+    def __connect(self, future = None):
         self.__connection.start()
