@@ -15,7 +15,7 @@ handlers:
     formatter: default
     level: DEBUG
     filename: logs/latest.log
-    when: D
+    when: midnight
     interval: 1
     backupCount: 31
   error:
