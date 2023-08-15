@@ -17,4 +17,4 @@ SQLAlchemy~=2.0.19
 numpy~=1.24.3
 pandas~=2.0.3
 torch~=2.0.1
-tqdm~=4.66.1
+# tqdm~=4.66.1

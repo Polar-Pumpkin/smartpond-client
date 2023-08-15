@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Any
 
 from pandas import DataFrame
 from sqlalchemy import select
@@ -35,7 +35,7 @@ def pull(sensor_id: str, amount: int) -> DataFrame:
         .order_by(mariadb.Report.created.desc())
         .limit(amount)
     )
-    for sensor in session.execute(statement).all():
+    for sensor in session.execute(statement).scalars():
         key = _transform_key(sensor.created)
         sensors[key] = sensor.context['fields']
 
@@ -49,20 +49,31 @@ def pull(sensor_id: str, amount: int) -> DataFrame:
         .order_by(mariadb.Report.created.desc())
         .limit(amount)
     )
-    for weather in session.execute(statement).all():
+    for weather in session.execute(statement).scalars():
         key = _transform_key(weather.created)
         weathers[key] = weather_util.extract(weather.context)
 
     sensors = {key: sensors[key] for key in sorted(sensors)}
     weathers = {key: weathers[key] for key in sorted(weathers)}
-    for sensor_key, sensor in sensors.items():
-        value: Dict[str, float] = {}
-        for weather_key, weather in weathers.items():
-            if sensor_key > weather_key:
-                value.update(sensor)
-                value.update(weather)
-        if len(value) > 0:
+    if len(weathers) > 0:
+        for sensor_key, sensor in sensors.items():
+            value: Dict[str, float] = {}
+            value.update(sensor)
+            for weather_key, weather in weathers.items():
+                if sensor_key > weather_key:
+                    value.update(weather)
+            if len(value) > 0:
+                value.update(list(weathers.values())[-1])
             values[sensor_key] = value
-    frame = DataFrame(values).T
-    frame['溶解氧'] = frame['溶解氧'].fillna(0.0)
+
+    frame = []
+    for key, elements in values.items():
+        row: Dict[str, Any] = {'时间': key}
+        row.update(elements)
+        frame.append(row)
+        # frame.append(key)
+        # frame += prepare(row)
+    frame = DataFrame(frame)
+    if '溶解氧' in frame.columns:
+        frame['溶解氧'] = frame['溶解氧'].fillna(0.0)
     return frame

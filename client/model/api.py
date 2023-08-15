@@ -1,14 +1,13 @@
 import os
 from enum import Enum
-from typing import List, Optional
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 import torch
-from tqdm import tqdm
 
-from model import DeepAR
-from scaler import Scaler, MeanScaler
+from client.model.model import DeepAR
+from client.model.scaler import Scaler, MeanScaler
 
 num_obs_to_train = 168  # 训练的历史窗口长度
 seq_len = 30  # 预测的未来窗口长度
@@ -125,7 +124,6 @@ def run(field: str, values: pd.DataFrame, scaler: Optional[Scaler] = None):  # -
     sorted_indices = np.argsort(np.abs(values))[::-1]
     top_labels = [corr_frame.iloc[index]['col_labels'] for index in sorted_indices[:5]]
     selected_labels = list(map(str, top_labels))
-    print(selected_labels)
     # X = np.asarray(list(map(lambda x: frame[x], selected_labels)))
     X = np.c_[np.asarray(frame[selected_labels[0]]), np.asarray(frame[selected_labels[1]]), np.asarray(
         frame[selected_labels[2]]), np.asarray(frame[selected_labels[3]]), np.asarray(frame[selected_labels[4]])]
@@ -161,7 +159,7 @@ def run(field: str, values: pd.DataFrame, scaler: Optional[Scaler] = None):  # -
     result = []
     n_samples = sample_size  # 采样个数
 
-    for _ in tqdm(range(n_samples)):
+    for _ in range(n_samples):
         y_pred, _, _ = model(X_test, Y_test, Xf_test)  # ypred:(num_samples, seq_len)4
         y_pred = y_pred.cpu().numpy()
         y_pred = scaler.inverse_transform(y_pred)

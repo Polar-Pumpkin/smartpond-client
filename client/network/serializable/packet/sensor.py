@@ -58,7 +58,6 @@ class SensorCreationReceipt(IncomingPacket):
 
 count = 0
 
-
 def _report_index() -> int:
     global count
     count = count + 1
