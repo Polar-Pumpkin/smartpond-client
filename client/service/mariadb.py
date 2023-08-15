@@ -3,8 +3,9 @@ import logging
 import os
 from typing import Dict, Any, Optional
 
-from sqlalchemy import create_engine, Column, BigInteger, String, JSON, DateTime, update, func, text
+from sqlalchemy import create_engine, Column, BigInteger, String, JSON, DateTime, update, func
 from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.sql.ddl import CreateSchema
 
 _logger = logging.getLogger(__name__)
 Entity = declarative_base()
@@ -28,16 +29,16 @@ config_path = os.path.join('config', 'mariadb.json')
 with open(config_path, 'r') as file:
     config = json.load(file)
 url = config['url']
-database = config.get('database', None) or 'smartpond'
-engine = create_engine(url)
+schema = config.get('schema', None) or 'smartpond'
+engine = create_engine(url, echo=True, execution_options={
+    'schema_translate_map': {None: schema}
+})
 
 with engine.connect() as conn:
-    conn.execute(text('commit'))
-    conn.execute(text(f'create database if not exists {database}'))
-    conn.execute(text(f'use {database}'))
+    conn.execute(CreateSchema(schema, True))
+    Entity.metadata.create_all(engine)
 
 Session = sessionmaker(bind=engine)
-Entity.metadata.create_all(engine)
 
 
 def save_report(index: int, context: Dict[str, Any], sensor_id: Optional[str] = None, report_id: Optional[str] = None):
