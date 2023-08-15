@@ -72,7 +72,7 @@ class Report(OutgoingPacket):
     def __init__(self, report: SensorReport):
         idx = _report_index()
         super().__init__(index=idx, report=report)
-        mariadb.save_report(idx, report.to_json(), report.sensorId)
+        mariadb.save_report(idx, report.to_json(), sensor_id=report.sensorId)
 
 
 @serializable
@@ -82,7 +82,9 @@ class RawReport(OutgoingPacket):
     context = DefaultProperty()
 
     def __init__(self, sensor_type: str, context):
-        super().__init__(index=_report_index(), type=sensor_type, context=context)
+        idx = _report_index()
+        super().__init__(index=idx, type=sensor_type, context=context)
+        mariadb.save_report(idx, context, 'prediction', context['sensorId'])
 
 
 @serializable

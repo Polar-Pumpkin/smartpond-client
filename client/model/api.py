@@ -1,5 +1,6 @@
 import os
 from enum import Enum
+from logging import Logger
 from typing import Optional
 
 import numpy as np
@@ -97,7 +98,9 @@ def sliding_window(data_set, width, multi_vector=True):  # DataSet has to be as 
 width = num_obs_to_train + seq_len
 
 
-def run(field: str, values: pd.DataFrame, scaler: Optional[Scaler] = None):  # -> Tuple[float,float,float]:
+def run(field: str, values: pd.DataFrame,
+        scaler: Optional[Scaler] = None,
+        logger: Optional[Logger] = None):
     frame = pd.DataFrame(np.array(values), columns=columns)
     frame[Field.TIMESTAMP.value] = pd.to_datetime(frame[Field.TIMESTAMP.value], format='%Y/%m/%d %H:%M')
     frame[Field.YEAR.value] = frame[Field.TIMESTAMP.value].apply(lambda x: x.year)
@@ -124,6 +127,7 @@ def run(field: str, values: pd.DataFrame, scaler: Optional[Scaler] = None):  # -
     sorted_indices = np.argsort(np.abs(values))[::-1]
     top_labels = [corr_frame.iloc[index]['col_labels'] for index in sorted_indices[:5]]
     selected_labels = list(map(str, top_labels))
+    logger.info('已选择特征: %s', selected_labels)
     # X = np.asarray(list(map(lambda x: frame[x], selected_labels)))
     X = np.c_[np.asarray(frame[selected_labels[0]]), np.asarray(frame[selected_labels[1]]), np.asarray(
         frame[selected_labels[2]]), np.asarray(frame[selected_labels[3]]), np.asarray(frame[selected_labels[4]])]
@@ -180,7 +184,7 @@ def run(field: str, values: pd.DataFrame, scaler: Optional[Scaler] = None):  # -
         mae = error / seq_len
         MAE += mae
     MAE = MAE / test_samples
-    print("P50 quantile MAE:", MAE)
+    logger.info("P50 quantile MAE: %f", MAE)
 
     # 6. # P50 quantile MAPE
     MAPe = 0
@@ -188,14 +192,16 @@ def run(field: str, values: pd.DataFrame, scaler: Optional[Scaler] = None):  # -
         mape = MAPE(true[i, :], pred_mid[i, :])
         MAPe += mape
     MAPe = MAPe / test_samples
-    print("P50 quantile MAPE: {}".format(MAPe))
+    logger.info("P50 quantile MAPE: %f", MAPe)
     return pred_mid
 
 
 if __name__ == '__main__':
+    import logging
+    logger = logging.getLogger(__name__)
     data = pd.read_csv(os.path.join('..', '..', 'weight', 'test_data.csv'))
     fields = [Field.DO, Field.WATERTEMP, Field.PH, Field.NH3N, Field.NO3N]
     values = []
     for field in fields:
-        value = run(field.value, data, MeanScaler())
+        value = run(field.value, data, MeanScaler(), logger)
         print(value)

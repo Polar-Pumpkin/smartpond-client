@@ -25,7 +25,18 @@ handlers:
     filename: logs/error.log
     maxBytes: 10240
     backupCount: 3
+#  sqlalchemy:
+#    class: logging.handlers.TimedRotatingFileHandler
+#    formatter: default
+#    level: DEBUG
+#    filename: logs/sqlalchemy.log
+#    when: midnight
+#    interval: 1
+#    backupCount: 31
 loggers:
   client:
     level: DEBUG
     handlers: [console, file, error]
+#  sqlalchemy:
+#    level: DEBUG
+#    handlers: [sqlalchemy]

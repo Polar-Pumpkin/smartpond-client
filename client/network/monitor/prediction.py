@@ -31,7 +31,7 @@ class PredictThread(Thread):
         for field in self.fields:
             timestamp = time.time()
             _logger.info(f'开始预测参数: {field}')
-            values = run(field, frame, MeanScaler())
+            values = run(field, frame, MeanScaler(), logger=_logger)
             values = list(map(list, values))
             elapsed = int((time.time() - timestamp) * 1000)
             context[field] = values
@@ -42,7 +42,7 @@ class PredictThread(Thread):
 
 
 class PredictionMonitor(Monitor):
-    count = 30
+    count = 0
 
     def __init__(self, sensor: Sensor):
         self.sensor = sensor

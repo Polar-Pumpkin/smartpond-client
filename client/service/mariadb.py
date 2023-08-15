@@ -30,7 +30,7 @@ with open(config_path, 'r') as file:
     config = json.load(file)
 url = config['url']
 schema = config.get('schema', None) or 'smartpond'
-engine = create_engine(url, echo=True, execution_options={
+engine = create_engine(url, execution_options={
     'schema_translate_map': {None: schema}
 })
 
@@ -41,10 +41,13 @@ with engine.connect() as conn:
 Session = sessionmaker(bind=engine)
 
 
-def save_report(index: int, context: Dict[str, Any], sensor_id: Optional[str] = None, report_id: Optional[str] = None):
+def save_report(index: int, context: Dict[str, Any],
+                report_type: Optional[str] = None,
+                sensor_id: Optional[str] = None,
+                report_id: Optional[str] = None):
     session = Session()
     report = Report(index=index,
-                    type='sensor' if report_id is None else 'weather',
+                    type=report_type or 'sensor' if report_id is None else 'weather',
                     context=context,
                     sensor_id=sensor_id,
                     report_id=report_id)
