@@ -1,3 +1,4 @@
 {
-  "url": "mariadb+mariadbconnector://smartpond:smartpond@localhost/smartpond"
+  "url": "mariadb+mariadbconnector://smartpond:smartpond@localhost",
+  "database": "smartpond"
 }
