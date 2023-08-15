@@ -7,7 +7,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QGroupBox, QVBoxLayout, QHBoxLayout, QLabel, QSizePolicy, QSpacerItem, QPushButton, \
     QGridLayout
 
-from client.network.monitor import Monitor
+from client.network.monitor.serial import SerialMonitor
 from client.ui.widget.sensor import SensorFieldWidget
 
 logger = logging.getLogger(__name__)
@@ -16,12 +16,12 @@ logger = logging.getLogger(__name__)
 class SensorViewWidget(QGroupBox):
     fetch = Signal()
 
-    def __init__(self, monitor: Monitor):
+    def __init__(self, monitor: SerialMonitor):
         super().__init__()
-        self.monitor: Monitor = monitor
+        self.monitor: SerialMonitor = monitor
         self.indexes: Dict[str, SensorFieldWidget] = {}
 
-        title = monitor.sensor.name
+        title = monitor.name
         self.setTitle(title)
         logger.info(f'创建传感器视图: {title}')
 
@@ -75,9 +75,12 @@ class SensorViewWidget(QGroupBox):
 
     def pull(self):
         # TODO btn
-        self.label.hide()
         values = copy.deepcopy(self.monitor.last_values)
         trends = copy.deepcopy(self.monitor.history)
+        if values is None or trends is None:
+            return
+
+        self.label.hide()
         indexes: Dict[str, SensorFieldWidget] = {}
         for key, value in values.items():
             widget = self.indexes.get(key, None)

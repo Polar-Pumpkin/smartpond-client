@@ -1,20 +1,17 @@
 import asyncio
-import copy
 import logging
-import struct
 import time
 from asyncio import Event, AbstractEventLoop
 from concurrent.futures import Future
-from datetime import datetime
 from threading import Thread
-from typing import Tuple, List, Dict
-
-from pymodbus.client import AsyncModbusSerialClient
-from pymodbus.register_read_message import ReadHoldingRegistersResponse
+from typing import List, Dict
 
 from client.abstract.meta import Singleton
+from client.abstract.monitor import Monitor
+from client.network.monitor.prediction import PredictionMonitor
+from client.network.monitor.serial import SerialMonitor
+from client.network.monitor.weather import WeatherMonitor
 from client.network.serializable import Sensor, SensorStructure
-from client.network.websocket import Client
 from client.ui.window import MainWindow
 
 logger = logging.getLogger(__name__)
@@ -23,114 +20,15 @@ commands = {
 }
 
 
-class Monitor:
-    def __init__(self, sensor: Sensor, structure: SensorStructure):
-        self.sensor: Sensor = sensor
-        self.structure: SensorStructure = structure
-        self.command: Tuple[int, int, int] = commands[sensor.type]
-        self.client: AsyncModbusSerialClient = AsyncModbusSerialClient(port=self.sensor.port,
-                                                                       baudrate=9600, bytesize=8,
-                                                                       parity='N', stopbits=1)
-        self.payload: List[float] | None = None
-        self.timestamp: datetime | None = None
-        self.history: Dict[str, Dict[datetime, float]] = {}
-
-    @property
-    def is_online(self) -> bool:
-        return self.client.connected
-
-    @property
-    def last_values(self) -> Dict[str, float] | None:
-        datas = self.payload
-        if datas is None:
-            return None
-        return self.match(datas)
-
-    @property
-    def last_update(self) -> datetime | None:
-        return self.timestamp
-
-    def match(self, values: List[float]) -> Dict[str, float]:
-        return dict(filter(lambda x: x[1] != 0.0, zip(self.structure.fields.keys(), values)))
-
-    def record(self):
-        timestamp = copy.deepcopy(self.last_update)
-        timestamp.replace(second=0, microsecond=0)
-        values = self.last_values
-        for key, value in values.items():
-            records = self.history.get(key, {})
-            delta = None
-            if len(records) > 0:
-                delta = timestamp - max(records.keys())
-            if delta is not None and delta.total_seconds() < 60:
-                continue
-            records[timestamp] = value
-            if len(records) > 60:
-                records = {x[0]: x[1] for x in records.items() if (timestamp - x[0]).total_seconds() < 3600}
-            self.history[key] = records
-        for key in list(filter(lambda x: x not in values, self.history.keys())):
-            self.history.pop(key)
-
-    async def connect(self):
-        await self.client.connect()
-
-    async def close(self):
-        await self.client.close()
-
-    async def pull(self) -> List[float] | None:
-        if not self.is_online:
-            logger.info('正在尝试重新连接至传感器')
-            await self.connect()
-        if not self.is_online:
-            return None
-        timestamp = time.time()
-        # noinspection PyUnresolvedReferences
-        response = await self.client.read_holding_registers(*self.command)
-        if not isinstance(response, ReadHoldingRegistersResponse):
-            logger.warning(f'与设备通信时收到的响应无效: ({type(response).__name__}) {response}')
-            return None
-        payload = response.encode()
-
-        values = []
-        for index in range(1, payload[0], 4):
-            upper = payload[index:index + 2]
-            lower = payload[index + 2:index + 4]
-            values.append(struct.unpack('>f', lower + upper)[0])
-        self.payload = values
-        self.timestamp = datetime.now()
-        self.record()
-        elapsed = int((time.time() - timestamp) * 1000)
-        logger.info(f'获取设备 {self.sensor.name} 报告({elapsed}ms)')
-        return values
-
-    async def lazy_pull(self):
-        if self.payload is None or self.timestamp is None:
-            return await self.pull()
-        delta = datetime.now() - self.timestamp
-        if delta.total_seconds() >= 60:
-            return await self.pull()
-        return self.payload
-
-    async def report(self):
-        datas: List[float] | None = await self.lazy_pull()
-        if datas is None:
-            return
-        fields: Dict[str, float] = self.match(datas)
-        logger.info(fields)
-        self.sensor.fields.clear()
-        self.sensor.fields.update({x: True for x in fields.keys()})
-        from client.network.serializable import SensorReport
-        report = SensorReport(node_id=self.sensor.nodeId, sensor_id=self.sensor.id, model=self.sensor.type,
-                              fields=fields, timestamp=datetime.now())
-        from client.network.serializable.packet import Report
-        Client().send(Report(report))
-
-
 class MonitorThread(Thread):
     def __init__(self, window: MainWindow):
         super().__init__()
         self.window: MainWindow = window
         self.monitors: Dict[str, Monitor] = {}
+
+        self.weather: WeatherMonitor = WeatherMonitor()
+        self.monitors['weather'] = self.weather
+
         self.__loop: AbstractEventLoop = asyncio.new_event_loop()
         self.__stop_sign: Event = Event()
         self.__stopped: Future = Future()
@@ -202,12 +100,15 @@ class MonitorThread(Thread):
         if monitor is not None and monitor.is_online:
             logger.info(f'复用设备 {sensor.name} 的监控实例')
             return
-        monitor = Monitor(sensor, structure)
+        prediction = PredictionMonitor()
+        monitor = SerialMonitor(sensor, structure, prediction)
         try:
             await monitor.connect()
         except Exception as ex:
             logger.error(f'连接至设备 {sensor.name} 时遇到问题: {ex}', exc_info=ex)
         self.monitors[sensor.name] = monitor
+        self.monitors[f'{sensor.name}[prediction]'] = prediction
+        self.weather.register_prediction(prediction)
         logger.info(f'开始监控设备 {sensor.name}')
 
     def pull(self, monitor: Monitor) -> Future[List[float] | None]:

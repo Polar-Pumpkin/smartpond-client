@@ -54,7 +54,7 @@ class Profile(IncomingPacket):
             window.builder.emit([DashboardPage, window])
 
         Cached().profile = self
-        from client.network.monitor import Monitors
+        from client.network.monitors import Monitors
         monitors = Monitors()
         monitors.window = window
         monitors.launch()

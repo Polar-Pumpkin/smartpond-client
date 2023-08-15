@@ -1,6 +1,7 @@
 import logging
+from typing import Dict
 
-from jsonobject import StringProperty, ObjectProperty, SetProperty, IntegerProperty
+from jsonobject import StringProperty, ObjectProperty, SetProperty, IntegerProperty, DefaultProperty
 
 from client.abstract.packet import IncomingPacket, OutgoingPacket
 from client.abstract.serialize import serializable
@@ -71,3 +72,26 @@ class Report(OutgoingPacket):
 
     def __init__(self, report: SensorReport):
         super().__init__(index=_report_index(), report=report)
+
+
+@serializable
+class RequestWeather(OutgoingPacket):
+    index = IntegerProperty()
+
+    def __init__(self):
+        super().__init__(index=_report_index())
+
+
+@serializable
+class Weather(IncomingPacket):
+    index = IntegerProperty()
+    context = DefaultProperty()
+    reportId = StringProperty()
+
+    async def execute(self, connection: Connection, client: Client, window: MainWindow):
+        values: Dict[str, float] = {}
+        from client.network.monitors import Monitors
+        monitors = Monitors().thread.weather.predictions
+        for monitor in monitors:
+            pass
+        pass

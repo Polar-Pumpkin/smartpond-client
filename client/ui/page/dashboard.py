@@ -5,7 +5,8 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpacerItem, QSizePolicy, QPushButton
 
 from client.config.cached import Cached
-from client.network.monitor import Monitors
+from client.network.monitor.serial import SerialMonitor
+from client.network.monitors import Monitors
 from client.ui.widget.dashboard import SensorViewWidget
 from client.ui.window import MainWindow
 
@@ -105,6 +106,8 @@ class DashboardPage(QWidget):
         self.grid.setContentsMargins(10, 10, 10, 10)
 
         for monitor in Monitors().monitors.values():
+            if not isinstance(monitor, SerialMonitor):
+                continue
             widget = SensorViewWidget(monitor)
             self.indexes[monitor.sensor.name] = widget
             self.grid.addWidget(widget)

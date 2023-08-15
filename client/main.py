@@ -45,7 +45,7 @@ def main():
     code = app.exec_()
     logger.info('窗体已停止')
 
-    from client.network.monitor import Monitors
+    from client.network.monitors import Monitors
     try:
         Monitors().stop().result(1)
     except TimeoutError:
