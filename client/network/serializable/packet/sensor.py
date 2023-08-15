@@ -4,7 +4,7 @@ from jsonobject import StringProperty, ObjectProperty, SetProperty, IntegerPrope
 
 import client.service.mariadb as mariadb
 from client.abstract.packet import IncomingPacket, OutgoingPacket
-from client.abstract.serialize import serializable
+from client.abstract.serialize import serializable, serialize
 from client.config.cached import Cached
 from client.network.serializable import Sensor, SensorStructure, SensorReport
 from client.network.websocket import Connection, Client
@@ -72,7 +72,7 @@ class Report(OutgoingPacket):
     def __init__(self, report: SensorReport):
         idx = _report_index()
         super().__init__(index=idx, report=report)
-        mariadb.save_report(idx, report, report.sensorId)
+        mariadb.save_report(idx, report.to_json(), report.sensorId)
 
 
 @serializable
