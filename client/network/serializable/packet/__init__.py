@@ -3,4 +3,4 @@ from .control import Failure, Operation
 from .node import RequestNodeList, NodeList, NodeCreation
 from .pond import PondList, PondCreation, PondCreationReceipt
 from .sensor import RequestSensorTypeList, SensorTypeList, SensorCreation, SensorCreationReceipt, Report, \
-    RequestWeather, Weather
+    RawReport, RequestWeather, Weather

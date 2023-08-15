@@ -1,16 +1,11 @@
 from typing import List
 
 from client.abstract.monitor import Monitor
-from client.network.monitor.prediction import PredictionMonitor
 from client.network.websocket import Client
 
 
 class WeatherMonitor(Monitor):
     count = 0
-    predictions: List[PredictionMonitor] = []
-
-    def register_prediction(self, prediction: PredictionMonitor):
-        self.predictions.append(prediction)
 
     @property
     def name(self) -> str:

@@ -3,27 +3,25 @@ import logging
 import struct
 import time
 from datetime import datetime
-from typing import Tuple, List, Dict, Optional
+from typing import Tuple, List, Dict
 
 from pymodbus.client import AsyncModbusSerialClient
 from pymodbus.register_read_message import ReadHoldingRegistersResponse
 
 from client.abstract.monitor import Monitor
-from client.network.monitor.prediction import PredictionMonitor
 from client.network.serializable import Sensor, SensorStructure
 from client.network.websocket import Client
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 commands = {
     'TNET_100': (100, 24, 33)
 }
 
 
 class SerialMonitor(Monitor):
-    def __init__(self, sensor: Sensor, structure: SensorStructure, prediction: Optional[PredictionMonitor] = None):
+    def __init__(self, sensor: Sensor, structure: SensorStructure):
         self.sensor: Sensor = sensor
         self.structure: SensorStructure = structure
-        self.prediction = prediction
         self.command: Tuple[int, int, int] = commands[sensor.type]
         self.client: AsyncModbusSerialClient = AsyncModbusSerialClient(port=self.sensor.port,
                                                                        baudrate=9600, bytesize=8,
@@ -80,7 +78,7 @@ class SerialMonitor(Monitor):
 
     async def pull(self) -> List[float] | None:
         if not self.is_online:
-            logger.info('正在尝试重新连接至传感器')
+            _logger.info('正在尝试重新连接至传感器')
             await self.connect()
         if not self.is_online:
             return None
@@ -88,7 +86,7 @@ class SerialMonitor(Monitor):
         # noinspection PyUnresolvedReferences
         response = await self.client.read_holding_registers(*self.command)
         if not isinstance(response, ReadHoldingRegistersResponse):
-            logger.warning(f'与设备通信时收到的响应无效: ({type(response).__name__}) {response}')
+            _logger.warning(f'与设备通信时收到的响应无效: ({type(response).__name__}) {response}')
             return None
         payload = response.encode()
 
@@ -101,7 +99,7 @@ class SerialMonitor(Monitor):
         self.timestamp = datetime.now()
         self.record()
         elapsed = int((time.time() - timestamp) * 1000)
-        logger.info(f'获取设备 {self.sensor.name} 报告({elapsed}ms)')
+        _logger.info(f'获取设备 {self.sensor.name} 报告({elapsed}ms)')
         return values
 
     async def lazy_pull(self):
@@ -117,9 +115,7 @@ class SerialMonitor(Monitor):
         if datas is None:
             return
         fields: Dict[str, float] = self.match(datas)
-        logger.info(fields)
-        if self.prediction:
-            self.prediction.append_serial(fields)
+        _logger.info(fields)
         self.sensor.fields.clear()
         self.sensor.fields.update({x: True for x in fields.keys()})
         from client.network.serializable import SensorReport

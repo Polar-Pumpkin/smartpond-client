@@ -1,8 +1,8 @@
 import logging
-from typing import Dict
 
 from jsonobject import StringProperty, ObjectProperty, SetProperty, IntegerProperty, DefaultProperty
 
+import client.service.mariadb as mariadb
 from client.abstract.packet import IncomingPacket, OutgoingPacket
 from client.abstract.serialize import serializable
 from client.config.cached import Cached
@@ -10,7 +10,7 @@ from client.network.serializable import Sensor, SensorStructure, SensorReport
 from client.network.websocket import Connection, Client
 from client.ui.window import MainWindow
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 @serializable
@@ -26,7 +26,7 @@ class SensorTypeList(IncomingPacket):
         from client.ui.page.sensor import SensorCreatePage
         widget = window.centralWidget()
         if not isinstance(widget, SensorCreatePage):
-            logger.warning('在主页面非 SensorCreatePage 的情况下收到 SensorTypeList')
+            _logger.warning('在主页面非 SensorCreatePage 的情况下收到 SensorTypeList')
             return
         widget.models.emit(list(self.types))
         widget.ready.emit()
@@ -71,7 +71,28 @@ class Report(OutgoingPacket):
     report = ObjectProperty(SensorReport)
 
     def __init__(self, report: SensorReport):
-        super().__init__(index=_report_index(), report=report)
+        idx = _report_index()
+        super().__init__(index=idx, report=report)
+        mariadb.save_report(idx, report, report.sensorId)
+
+
+@serializable
+class RawReport(OutgoingPacket):
+    index = IntegerProperty()
+    type = StringProperty()
+    context = DefaultProperty()
+
+    def __init__(self, sensor_type: str, context):
+        super().__init__(index=_report_index(), type=sensor_type, context=context)
+
+
+@serializable
+class ReportReceipt(IncomingPacket):
+    index = IntegerProperty()
+    reportId = StringProperty()
+
+    async def execute(self, connection: Connection, client: Client, window: MainWindow):
+        mariadb.attach_report_id(self.index, self.reportId)
 
 
 @serializable
@@ -89,9 +110,4 @@ class Weather(IncomingPacket):
     reportId = StringProperty()
 
     async def execute(self, connection: Connection, client: Client, window: MainWindow):
-        values: Dict[str, float] = {}
-        from client.network.monitors import Monitors
-        monitors = Monitors().thread.weather.predictions
-        for monitor in monitors:
-            pass
-        pass
+        mariadb.save_report(self.index, self.context, report_id=self.reportId)

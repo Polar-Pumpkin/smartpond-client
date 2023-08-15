@@ -3,10 +3,10 @@ import os
 import sys
 from concurrent.futures import TimeoutError
 
-import yaml
-from PyQt5.QtWidgets import QApplication
 import pyqtgraph
 import qdarktheme
+import yaml
+from PyQt5.QtWidgets import QApplication
 
 from client.util import handle_exception
 

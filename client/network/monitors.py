@@ -100,15 +100,14 @@ class MonitorThread(Thread):
         if monitor is not None and monitor.is_online:
             logger.info(f'复用设备 {sensor.name} 的监控实例')
             return
-        prediction = PredictionMonitor()
-        monitor = SerialMonitor(sensor, structure, prediction)
+        prediction = PredictionMonitor(sensor)
+        monitor = SerialMonitor(sensor, structure)
         try:
             await monitor.connect()
         except Exception as ex:
             logger.error(f'连接至设备 {sensor.name} 时遇到问题: {ex}', exc_info=ex)
-        self.monitors[sensor.name] = monitor
-        self.monitors[f'{sensor.name}[prediction]'] = prediction
-        self.weather.register_prediction(prediction)
+        self.monitors[monitor.name] = monitor
+        self.monitors[prediction.name] = prediction
         logger.info(f'开始监控设备 {sensor.name}')
 
     def pull(self, monitor: Monitor) -> Future[List[float] | None]:

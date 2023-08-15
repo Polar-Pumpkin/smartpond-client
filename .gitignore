@@ -10,3 +10,5 @@
 !client/**
 client/test
 client/**/__pycache__
+
+!config/**

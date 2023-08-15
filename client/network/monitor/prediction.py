@@ -1,40 +1,53 @@
-from datetime import datetime
-from typing import List, Dict
+import logging
+from typing import List
 
+import client.service.predict as predict
 from client.abstract.monitor import Monitor
+from client.model.api import run
+from client.model.scaler import MeanScaler
+from client.network.serializable import Sensor
+from client.network.websocket import Client
+
+_logger = logging.getLogger(__name__)
 
 
 class PredictionMonitor(Monitor):
     count = 0
-    serials: Dict[str, Dict[str, float]] = {}
-    weathers: Dict[str, Dict[str, float]] = {}
 
-    def append_serial(self, values: Dict[str, float]):
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M')
-        self.serials[timestamp] = values
-
-    def append_weather(self, values: Dict[str, float]):
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M')
-        self.weathers[timestamp] = values
+    def __init__(self, sensor: Sensor):
+        self.sensor = sensor
+        self.fields = ['溶解氧', '温度', 'pH', '氨氮', '硝氮']
 
     @property
     def name(self) -> str:
-        return '预测'
+        return f'{self.sensor.name}[Pred]'
 
     @property
     def is_online(self) -> bool:
         return True
 
     async def report(self):
-        self.count += 1
-        if self.count < 30:
+        # self.count += 1
+        # if self.count < 30:
+        #     return
+        # self.count = 0
+        frame = predict.pull(self.sensor.id, 200)
+        if len(frame) < 200:
+            _logger.warning('数据不足 200 条, 暂不执行预测')
             return
-        self.count = 0
-        await self.pull()
+        context = {
+            'sensorId': self.sensor.id
+        }
+        for field in self.fields:
+            values = run(field, frame, MeanScaler())
+            context[field] = values
+            _logger.info(f'已完成参数 {field} 的预测')
+        from client.network.serializable.packet import RawReport
+        Client().send(RawReport('PREDICTION', context))
+        _logger.info('已上传预测数据')
 
     async def close(self):
         pass
 
     async def pull(self) -> List[float]:
-        # TODO run prediction
         pass

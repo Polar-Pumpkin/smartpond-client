@@ -10,3 +10,11 @@ pyqtgraph~=0.13.3
 gitpython~=3.1.31
 pyqtdarktheme~=2.1.0
 requests_futures~=1.0.0
+
+# pymongo~=4.4.1
+mariadb~=1.1.7
+SQLAlchemy~=2.0.19
+numpy~=1.24.3
+pandas~=2.0.3
+torch~=2.0.1
+tqdm~=4.66.1

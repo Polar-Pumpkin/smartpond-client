@@ -1,0 +1,9 @@
+{
+  "host": "localhost",
+  "port": 27017,
+  "username": null,
+  "password": null,
+  "database": "smartpond",
+  "authSource": null,
+  "authMechanism": null
+}
